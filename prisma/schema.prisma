@@ -78,5 +78,5 @@ model BahnTrip {
   departure      String
   arrival        String
   departureDelay Int
-  arrivalDelay   Int // idk if we need this but using it jic
+  arrivalDelay   Int
 }
