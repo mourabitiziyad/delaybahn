@@ -71,3 +71,12 @@ model VerificationToken {
 
   @@unique([identifier, token])
 }
+
+model BahnTrip {
+  tripId         String @id
+  tripName       String
+  departure      String
+  arrival        String
+  departureDelay Int
+  arrivalDelay   Int // idk if we need this but using it jic
+}
