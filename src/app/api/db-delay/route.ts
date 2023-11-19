@@ -1,7 +1,7 @@
-import { NextResponse } from "next/server";
-import { db } from "~/server/db";
-
 export async function GET() {
-  const users = await db.user.findMany();
-  return NextResponse.json(users);
+  const res = await fetch(
+    "https://v6.db.transport.rest/locations?poi=false&addresses=false&query=hauptbanhof",
+  );
+  const data = await res.json();
+  return Response.json(data);
 }
