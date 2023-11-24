@@ -80,3 +80,26 @@ model BahnTrip {
   departureDelay Int
   arrivalDelay   Int
 }
+
+// Define the MongoDB datasource
+datasource mongo {
+  provider = "mongodb"
+  url      = env("MONGODB_URL")
+}
+
+model journey {
+  _id           String @id
+  depId         String
+  depName       String
+  depLatitude   Float
+  depLongitude  Float
+  arrId         String
+  arrName       String
+  arrLatitude   Float
+  arrLongitude  Float
+  avgDelay      Int
+}
+
+model todayTrip {
+  
+}
