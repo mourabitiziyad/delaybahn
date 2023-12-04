@@ -72,11 +72,26 @@ model VerificationToken {
   @@unique([identifier, token])
 }
 
-model BahnTrip {
-  tripId         String @id
-  tripName       String
-  departure      String
-  arrival        String
-  departureDelay Int
-  arrivalDelay   Int
+model Trip {
+  id             String   @id @default(cuid())
+  depId          String
+  depName        String
+  depLatitude    Float
+  depLongitude   Float
+  depDelay       Float
+  arrId          String
+  trainId        String
+  trainName      String
+  arrName        String
+  arrLatitude    Float
+  arrLongitude   Float
+  arrDelay       Float
+  tripDate       DateTime
+  createdAt      DateTime @default(now())
+  updatedAt      DateTime @updatedAt
+  @@unique([depId, arrId, trainId, tripDate])
+  @@index([depId, arrId])
 }
+
+// iso date time in 20h00 example
+// 2023-12-04T20:00:00+01:00
