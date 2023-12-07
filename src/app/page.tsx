@@ -1,8 +1,8 @@
 import TripSelection from "~/components/trip-selection";
-// import { getServerAuthSession } from "~/server/auth";
+import { getServerAuthSession } from "~/server/auth";
 
 export default async function Home() {
-  // const session = await getServerAuthSession();
+  const session = await getServerAuthSession();
 
   return (
     <main className="flex flex-col items-center justify-center">
