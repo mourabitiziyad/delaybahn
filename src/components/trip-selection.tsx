@@ -16,14 +16,62 @@ import {
   Popover,
 } from "@/components/ui/popover";
 import { Calendar } from "@/components/ui/calendar";
-import { JSX, SVGProps } from "react";
+import { JSX, SVGProps, useEffect, useState } from "react";
 import { Switch } from "./ui/switch";
 import { useStore } from "~/store/useStore";
 import { format } from "date-fns";
+import { api } from "~/trpc/react";
+import useDebounce from "~/hooks/useDebounce";
 
 export default function TripSelection() {
+  
+  const [departureQuery, setDeparture] = useState("");
+  const [arrivalQuery, setArrival] = useState("");
+
+  const debouncedDeparture = useDebounce(departureQuery, 500);
+  const debouncedArrival = useDebounce(arrivalQuery, 500);
+
+
   const { from, to, date, time, now, setTo, setDate, setTime, setNow } =
     useStore();
+
+  const {
+    data: DepartureQueryResults,
+    mutate: queryDepartures,
+    isLoading: isDepartureQueryLoading,
+    isError: isDepartureQueryError,
+  } = api.trip.getStation.useMutation();
+
+  const {
+    data: ArrivalQueryResults,
+    mutate: queryArrivals,
+    isLoading: isArrivalQueryLoading,
+    isError: isArrivalQueryError,
+  } = api.trip.getStation.useMutation();
+
+  const handleDepartureChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    setDeparture(e.target.value);
+  }
+
+  const handleArrivalChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    setArrival(e.target.value);
+  }
+
+  useEffect(() => {
+    if (departureQuery) {
+      console.log("departureQuery", departureQuery);
+      queryDepartures({query: departureQuery});
+    }
+  }, [debouncedDeparture]);
+
+  useEffect(() => {
+    if (arrivalQuery) {
+      console.log("arrivalQuery", arrivalQuery);
+      queryArrivals({query: arrivalQuery});
+    }
+  }, [debouncedArrival]);
+
+
   return (
     <Card className="mx-auto w-full max-w-2xl">
       <CardHeader>
@@ -36,19 +84,19 @@ export default function TripSelection() {
             <MapPinIcon className="mr-1 h-4 w-4 -translate-x-1" />
             From
           </Label>
-          <Input id="from" placeholder="Enter departure location" />
+          <Input id="from" onChange={handleDepartureChange} placeholder="Enter departure location" />
         </div>
         <div className="space-y-2">
           <Label className="flex justify-start" htmlFor="to">
             <MapPinIcon className="mr-1 h-4 w-4 -translate-x-1" />
             To
           </Label>
-          <Input id="to" placeholder="Enter destination location" />
+          <Input id="to" onChange={handleArrivalChange} placeholder="Enter destination location" />
         </div>
         <div className="grid grid-cols-2 gap-4">
           <div className="space-y-2">
             <Label
-              className={now ? "text-[#858484]" : ""}
+              className={now ? "text-muted-foreground" : ""}
               htmlFor="departure-date"
             >
               Departure Date
@@ -60,9 +108,7 @@ export default function TripSelection() {
                   variant="outline"
                 >
                   <CalendarDaysIcon className="mr-1 h-4 w-4 -translate-x-1" />
-                  {
-                    date ? (format(date, "PPP")) : (<span>Select Date</span>)
-                  }
+                  {date ? format(date, "PPP") : <span>Select Date</span>}
                 </Button>
               </PopoverTrigger>
               <PopoverContent align="start" className="w-auto p-0">
@@ -70,7 +116,9 @@ export default function TripSelection() {
                   id="departure-date"
                   mode="single"
                   selected={date}
-                  onSelect={(date: Date | undefined) => setDate(date ?? new Date())}
+                  onSelect={(date: Date | undefined) =>
+                    setDate(date ?? new Date())
+                  }
                   initialFocus
                 />
               </PopoverContent>
