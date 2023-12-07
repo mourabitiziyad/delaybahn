@@ -4,7 +4,7 @@ import { Inter } from "next/font/google";
 import { headers } from "next/headers";
 
 import { TRPCReactProvider } from "~/trpc/react";
-import { NavBar } from "./_components/nav-bar";
+import { NavBar } from "@/components/nav-bar";
 
 const inter = Inter({
   subsets: ["latin"],
@@ -19,9 +19,9 @@ export const metadata = {
 
 export default function RootLayout({
   children,
-}: {
+}: Readonly<{
   children: React.ReactNode;
-}) {
+}>) {
   return (
     <html lang="en">
       <body className={`min-h-screen bg-slate-100 font-sans ${inter.variable}`}>
