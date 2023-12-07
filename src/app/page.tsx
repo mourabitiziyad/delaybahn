@@ -1,11 +1,8 @@
-import { CreatePost } from "~/components/create-post";
 import TripSelection from "~/components/trip-selection";
-import { getServerAuthSession } from "~/server/auth";
-import { api } from "~/trpc/server";
+// import { getServerAuthSession } from "~/server/auth";
 
 export default async function Home() {
-  const hello = await api.post.hello.query({ text: "from tRPC" });
-  const session = await getServerAuthSession();
+  // const session = await getServerAuthSession();
 
   return (
     <main className="flex flex-col items-center justify-center">
