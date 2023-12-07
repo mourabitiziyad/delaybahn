@@ -28,7 +28,7 @@ export async function NavBar() {
       </div>
       <div className="flex-none">
         {session?.user.name && (
-          <span className="text-sm">Hello, {session.user.name}</span>
+          <span className="text-sm hidden md:block">Hello, {session.user.name}</span>
         )}
         <button>
           <Link
