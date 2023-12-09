@@ -1,14 +1,15 @@
 import { create } from "zustand";
+import { Stop } from "~/types/types";
 
 export interface StoreType {
-    from: string;
-    to: string;
+    from: Stop;
+    to: Stop;
     date: Date;
     now: boolean;
     time: string;
 
-    setFrom: (from: string) => void;
-    setTo: (to: string) => void;
+    setFrom: (from: Stop) => void;
+    setTo: (to: Stop) => void;
     setDate: (date: Date) => void;
     setNow: (now: boolean) => void;
     setTime: (time: string) => void;
@@ -16,8 +17,8 @@ export interface StoreType {
 }
 
 export const useStore = create<StoreType>((set) => ({
-    from: "",
-    to: "",
+    from: Object(),
+    to: Object(),
     date: new Date(),
     now: true,
     time: "",
@@ -29,8 +30,8 @@ export const useStore = create<StoreType>((set) => ({
     setTime: (time) => set(() => ({ time })),
     reset: () =>
         set(() => ({
-            from: "",
-            to: "",
+            from: Object(),
+            to: Object(),
             date: undefined,
             now: true,
             time: "",
