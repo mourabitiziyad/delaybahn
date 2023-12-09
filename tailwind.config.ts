@@ -1,7 +1,7 @@
 import { fontFamily } from "tailwindcss/defaultTheme";
 /** @type {import('tailwindcss').Config} */
 module.exports = {
-  darkMode: ["class"],
+  // darkMode: ["class"],
   content: [
     './pages/**/*.{ts,tsx}',
     './components/**/*.{ts,tsx}',
@@ -78,4 +78,7 @@ module.exports = {
     },
   },
   plugins: [require("daisyui"), require("tailwindcss-animate")],
+  daisyui: {
+    themes: ['light']
+  },
 };
