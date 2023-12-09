@@ -22,24 +22,47 @@ import { useStore } from "~/store/useStore";
 import { format } from "date-fns";
 import { api } from "~/trpc/react";
 import useDebounce from "~/hooks/useDebounce";
+import { SearchDropdown } from "./ui/search-dropdown";
+import { Stop } from "~/types/types";
+import { Spinner } from "./ui/spinner";
 
 export default function TripSelection() {
-  
   const [departureQuery, setDeparture] = useState("");
   const [arrivalQuery, setArrival] = useState("");
 
   const debouncedDeparture = useDebounce(departureQuery, 500);
   const debouncedArrival = useDebounce(arrivalQuery, 500);
 
+  const [showDepartureResults, setShowDepartureResults] = useState(false);
+  const [showArrivalResults, setShowArrivalResults] = useState(false);
 
-  const { from, to, date, time, now, setTo, setDate, setTime, setNow } =
-    useStore();
+  const {
+    from,
+    to,
+    date,
+    time,
+    now,
+    setFrom,
+    setTo,
+    setDate,
+    setTime,
+    setNow,
+  } = useStore();
+
+  const {
+    data: journeys,
+    mutate: searchJourneys,
+    isLoading: isJourneyLoading,
+    isError: isDepartureError,
+    error: JourneyError,
+  } = api.journey.searchJourney.useMutation();
 
   const {
     data: DepartureQueryResults,
     mutate: queryDepartures,
     isLoading: isDepartureQueryLoading,
     isError: isDepartureQueryError,
+    error: departureQueryError,
   } = api.trip.getStation.useMutation();
 
   const {
@@ -47,30 +70,32 @@ export default function TripSelection() {
     mutate: queryArrivals,
     isLoading: isArrivalQueryLoading,
     isError: isArrivalQueryError,
+    error: arrivalQueryError,
   } = api.trip.getStation.useMutation();
 
   const handleDepartureChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     setDeparture(e.target.value);
-  }
+  };
 
   const handleArrivalChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     setArrival(e.target.value);
-  }
+  };
 
   useEffect(() => {
     if (departureQuery) {
       console.log("departureQuery", departureQuery);
-      queryDepartures({query: departureQuery});
+      queryDepartures({ query: departureQuery });
+      setShowDepartureResults(true);
     }
   }, [debouncedDeparture]);
 
   useEffect(() => {
     if (arrivalQuery) {
       console.log("arrivalQuery", arrivalQuery);
-      queryArrivals({query: arrivalQuery});
+      queryArrivals({ query: arrivalQuery });
+      setShowArrivalResults(true);
     }
   }, [debouncedArrival]);
-
 
   return (
     <Card className="mx-auto w-full max-w-2xl">
@@ -79,19 +104,58 @@ export default function TripSelection() {
         <CardDescription>Enter your trip details.</CardDescription>
       </CardHeader>
       <CardContent className="space-y-4">
-        <div className="space-y-2">
+        <div className="relative space-y-2">
           <Label className="flex justify-start" htmlFor="from">
             <MapPinIcon className="mr-1 h-4 w-4 -translate-x-1" />
-            From
+            <span>{`From ${from.name ? from.name + " -" : ""} ${from.id ? from.id : ""}`}</span>
           </Label>
-          <Input id="from" onChange={handleDepartureChange} placeholder="Enter departure location" />
+          <Input
+            id="from"
+            value={departureQuery}
+            onChange={handleDepartureChange}
+            onClick={() => DepartureQueryResults && setShowDepartureResults(true)}
+            placeholder="Enter departure location"
+          />
+          <SearchDropdown
+            showResults={showDepartureResults}
+            setSearchVisibility={setShowDepartureResults}
+            errorMessage={departureQueryError?.message}
+            isError={isDepartureQueryError}
+            isLoading={isDepartureQueryLoading}
+            searchResults={DepartureQueryResults}
+            onResultSelect={(result: Stop) => {
+              setDeparture(result.name); 
+              setFrom(result);
+              setTimeout(() => {
+                setShowDepartureResults(false);
+              }, 600);
+            }}
+          />
         </div>
         <div className="space-y-2">
           <Label className="flex justify-start" htmlFor="to">
             <MapPinIcon className="mr-1 h-4 w-4 -translate-x-1" />
-            To
+            <span>{`To ${to.name ? to.name + " -" : ""} ${to.id ? to.id : ""}`}</span>
           </Label>
-          <Input id="to" onChange={handleArrivalChange} placeholder="Enter destination location" />
+          <Input
+            id="to"
+            value={arrivalQuery}
+            onChange={handleArrivalChange}
+            onClick={() => ArrivalQueryResults && setShowArrivalResults(true)}
+            placeholder="Enter destination location"
+          />
+          <SearchDropdown
+            showResults={showArrivalResults}
+            setSearchVisibility={setShowArrivalResults}
+            errorMessage={arrivalQueryError?.message}
+            isError={isArrivalQueryError}
+            isLoading={isArrivalQueryLoading}
+            searchResults={ArrivalQueryResults}
+            onResultSelect={(result: Stop) => {
+              setTo(result);
+              setShowArrivalResults(false);
+            }}
+          />
         </div>
         <div className="grid grid-cols-2 gap-4">
           <div className="space-y-2">
@@ -137,10 +201,21 @@ export default function TripSelection() {
         </div>
       </CardContent>
       <CardFooter>
-        <Button className="w-full" type="submit">
+        <Button onClick={() => searchJourneys({
+          from: from.id,
+          to: to.id,
+          date: date,
+          now: now,
+        })}
+        className="w-full"
+        type="submit">
           Search
+          {isJourneyLoading && <Spinner className="ml-2 text-white" />}
         </Button>
       </CardFooter>
+      <CardContent> 
+      <span className="relative overflow-x-scroll">{journeys && JSON.stringify(journeys)}</span>
+      </CardContent>
     </Card>
   );
 }
