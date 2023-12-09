@@ -5,7 +5,7 @@ import Link from "next/link";
 export async function NavBar() {
   const session = await getServerAuthSession();
   return (
-    <div className="navbar bg-base-100 md:px-10">
+    <div className="navbar bg-white md:px-10">
       <div className="flex-none">
         <button className="btn btn-square btn-ghost md:hidden">
           <svg
