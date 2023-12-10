@@ -1,44 +1,35 @@
-// This is your Prisma schema file,
-// learn more about it in the docs: https://pris.ly/d/prisma-schema
-
 generator client {
   provider = "prisma-client-js"
 }
 
 datasource db {
   provider = "postgresql"
-  // NOTE: When using mysql or sqlserver, uncomment the @db.Text annotations in model Account below
-  // Further reading:
-  // https://next-auth.js.org/adapters/prisma#create-the-prisma-schema
-  // https://www.prisma.io/docs/reference/api-reference/prisma-schema-reference#string
   url      = env("DATABASE_URL")
 }
 
 model Post {
-  id        Int      @id @default(autoincrement())
-  name      String
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
-
-  createdBy   User   @relation(fields: [createdById], references: [id])
+  id          Int      @id @default(autoincrement())
+  name        String
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
   createdById String
+  createdBy   User     @relation(fields: [createdById], references: [id])
 
   @@index([name])
 }
 
-// Necessary for Next auth
 model Account {
   id                String  @id @default(cuid())
   userId            String
   type              String
   provider          String
   providerAccountId String
-  refresh_token     String? @db.Text
-  access_token      String? @db.Text
+  refresh_token     String?
+  access_token      String?
   expires_at        Int?
   token_type        String?
   scope             String?
-  id_token          String? @db.Text
+  id_token          String?
   session_state     String?
   user              User    @relation(fields: [userId], references: [id], onDelete: Cascade)
 
@@ -60,8 +51,8 @@ model User {
   emailVerified DateTime?
   image         String?
   accounts      Account[]
-  sessions      Session[]
   posts         Post[]
+  sessions      Session[]
 }
 
 model VerificationToken {
@@ -73,25 +64,30 @@ model VerificationToken {
 }
 
 model Trip {
-  id             String   @id @default(cuid())
-  depId          String
-  depName        String
-  depLatitude    Float
-  depLongitude   Float
-  depDelay       Float
-  arrId          String
-  trainId        String
-  trainName      String
-  arrName        String
-  arrLatitude    Float
-  arrLongitude   Float
-  arrDelay       Float
-  tripDate       DateTime
-  createdAt      DateTime @default(now())
-  updatedAt      DateTime @updatedAt
+  id           String   @id @default(cuid())
+  depId        String
+  depName      String
+  depLatitude  Float
+  depLongitude Float
+  depDelay     Float
+  arrId        String
+  trainId      String
+  trainName    String
+  arrName      String
+  arrLatitude  Float
+  arrLongitude Float
+  arrDelay     Float
+  tripDate     DateTime
+  createdAt    DateTime @default(now())
+  updatedAt    DateTime @updatedAt
+
   @@unique([depId, arrId, trainId, tripDate])
   @@index([depId, arrId])
 }
 
-// iso date time in 20h00 example
-// 2023-12-04T20:00:00+01:00
+model Station {
+  id        String   @id @unique @default(cuid())
+  name      String
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
