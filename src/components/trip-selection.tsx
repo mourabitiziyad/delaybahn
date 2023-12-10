@@ -107,13 +107,17 @@ export default function TripSelection() {
         <div className="relative space-y-2">
           <Label className="flex justify-start" htmlFor="from">
             <MapPinIcon className="mr-1 h-4 w-4 -translate-x-1" />
-            <span>{`From ${from.name ? from.name + " -" : ""} ${from.id ? from.id : ""}`}</span>
+            <span>{`From ${from.name ? from.name + " -" : ""} ${
+              from.id ? from.id : ""
+            }`}</span>
           </Label>
           <Input
             id="from"
             value={departureQuery}
             onChange={handleDepartureChange}
-            onClick={() => DepartureQueryResults && setShowDepartureResults(true)}
+            onClick={() =>
+              DepartureQueryResults && setShowDepartureResults(true)
+            }
             placeholder="Enter departure location"
           />
           <SearchDropdown
@@ -124,18 +128,17 @@ export default function TripSelection() {
             isLoading={isDepartureQueryLoading}
             searchResults={DepartureQueryResults}
             onResultSelect={(result: Stop) => {
-              setDeparture(result.name); 
               setFrom(result);
-              setTimeout(() => {
-                setShowDepartureResults(false);
-              }, 600);
+              setShowDepartureResults(false);
             }}
           />
         </div>
         <div className="space-y-2">
           <Label className="flex justify-start" htmlFor="to">
             <MapPinIcon className="mr-1 h-4 w-4 -translate-x-1" />
-            <span>{`To ${to.name ? to.name + " -" : ""} ${to.id ? to.id : ""}`}</span>
+            <span>{`To ${to.name ? to.name + " -" : ""} ${
+              to.id ? to.id : ""
+            }`}</span>
           </Label>
           <Input
             id="to"
@@ -201,20 +204,26 @@ export default function TripSelection() {
         </div>
       </CardContent>
       <CardFooter>
-        <Button onClick={() => searchJourneys({
-          from: from.id,
-          to: to.id,
-          date: date,
-          now: now,
-        })}
-        className="w-full"
-        type="submit">
+        <Button
+          onClick={() =>
+            searchJourneys({
+              from: from.id,
+              to: to.id,
+              date: date,
+              now: now,
+            })
+          }
+          className="w-full"
+          type="submit"
+        >
           Search
           {isJourneyLoading && <Spinner className="ml-2 text-white" />}
         </Button>
       </CardFooter>
-      <CardContent> 
-      <span className="relative overflow-x-scroll">{journeys && JSON.stringify(journeys)}</span>
+      <CardContent>
+        <span className="relative overflow-x-scroll">
+          {journeys && JSON.stringify(journeys)}
+        </span>
       </CardContent>
     </Card>
   );
