@@ -103,7 +103,7 @@ export const journeyRouter = createTRPCRouter({
       console.log(input);
       try {
         const res = await fetch(
-          `https://v6.db.transport.rest/journeys?from=${input.from}&to=${input.to}&departure=${input.now ? "now" : input.date}&results=10&language=en`,
+          `https://v6.db.transport.rest/journeys?from=${input.from}&to=${input.to}&departure=${input.now ? "now" : input.date.toISOString()}&results=10&language=en`,
         );
         const data = await res.json();
         return data;
