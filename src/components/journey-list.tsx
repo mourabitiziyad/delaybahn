@@ -76,8 +76,8 @@ export default function JourneyList() {
             if (!journey.legs || journey.legs.length === 0) {
               return null;
             }
-            const firstLeg = journey.legs[0] as Journey;
-            const lastLeg = journey.legs[journey.legs.length - 1] as Journey;
+            const firstLeg = journey.legs[0]!;
+            const lastLeg = journey.legs[journey.legs.length - 1]!;
             const journeyDuration = formatTripDuration(
               firstLeg.departure,
               lastLeg.arrival,
@@ -106,7 +106,7 @@ export default function JourneyList() {
                       </div>
                       <div className="flex w-full">
                         {journey?.legs?.map((leg, index) => {
-                          let legRatio = calculateLegRatio(leg, totalDuration);
+                          const legRatio = calculateLegRatio(leg, totalDuration);
                           return (
                             <div
                               key={index}

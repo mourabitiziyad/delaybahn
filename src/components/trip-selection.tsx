@@ -52,7 +52,6 @@ export default function TripSelection() {
   const {journey, reset, setJourney} = useJourneyStore();
 
   const {
-    data: journeys,
     mutate: searchJourneys,
     isLoading: isJourneyLoading,
     isError: isDepartureError,
