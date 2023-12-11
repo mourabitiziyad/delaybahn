@@ -1,3 +1,4 @@
+import JourneyList from "~/components/journey-list";
 import TripSelection from "~/components/trip-selection";
 import { getServerAuthSession } from "~/server/auth";
 
@@ -11,6 +12,7 @@ export default async function Home() {
           Plan Your Trip
         </h1>
         <TripSelection />
+        <JourneyList />
       </div>
     </main>
   );
