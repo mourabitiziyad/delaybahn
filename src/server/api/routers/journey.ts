@@ -110,7 +110,8 @@ export const journeyRouter = createTRPCRouter({
       } catch (error) {
         throw new TRPCError({
           code: "INTERNAL_SERVER_ERROR",
-          message: error.message,
+          message: "Something went wrong",
+          cause: error,
         });
       }
     }),
