@@ -1,5 +1,5 @@
 import { create } from "zustand";
-import { Stop } from "~/types/types";
+import { JourneyResponse, Stop } from "~/types/types";
 
 export interface StoreType {
     from: Stop;
@@ -36,4 +36,16 @@ export const useStore = create<StoreType>((set) => ({
             now: true,
             time: "",
         })),
+}));
+
+export interface JourneyStoreType {
+    journey: JourneyResponse | undefined;
+    setJourney: (journey: JourneyResponse) => void;
+    reset: () => void;
+}
+
+export const useJourneyStore = create<JourneyStoreType>((set) => ({
+    journey: Object(),
+    setJourney: (journey: JourneyResponse) => set(() => ({ journey })),
+    reset: () => set(() => ({ journey: undefined })),
 }));
