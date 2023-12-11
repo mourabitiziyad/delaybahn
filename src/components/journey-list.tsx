@@ -190,7 +190,7 @@ export default function JourneyList() {
                                 -{" "}
                                 {format(parseISO(leg.plannedArrival), "HH:mm")}{" "}
                               </span>
-                              {(leg.departureDelay || leg.arrivalDelay) ? (
+                              {(leg.departureDelay ?? leg.arrivalDelay) ? (
                                 <span className="font-semibold text-red-500">
                                   ({format(parseISO(leg.departure), "HH:mm")} -{" "}
                                   {format(parseISO(leg.arrival), "HH:mm")})
