@@ -18,7 +18,7 @@ import {
 import { Calendar } from "@/components/ui/calendar";
 import { JSX, SVGProps, useEffect, useState } from "react";
 import { Switch } from "./ui/switch";
-import { useStore } from "~/store/useStore";
+import { useJourneyStore, useStore } from "~/store/useStore";
 import { format } from "date-fns";
 import { api } from "~/trpc/react";
 import useDebounce from "~/hooks/useDebounce";
@@ -30,8 +30,8 @@ export default function TripSelection() {
   const [departureQuery, setDeparture] = useState("");
   const [arrivalQuery, setArrival] = useState("");
 
-  const debouncedDeparture = useDebounce(departureQuery, 500);
-  const debouncedArrival = useDebounce(arrivalQuery, 500);
+  const debouncedDeparture = useDebounce(departureQuery, 300);
+  const debouncedArrival = useDebounce(arrivalQuery, 300);
 
   const [showDepartureResults, setShowDepartureResults] = useState(false);
   const [showArrivalResults, setShowArrivalResults] = useState(false);
@@ -49,13 +49,20 @@ export default function TripSelection() {
     setNow,
   } = useStore();
 
+  const {journey, reset, setJourney} = useJourneyStore();
+
   const {
     data: journeys,
     mutate: searchJourneys,
     isLoading: isJourneyLoading,
     isError: isDepartureError,
     error: JourneyError,
-  } = api.journey.searchJourney.useMutation();
+  } = api.journey.searchJourney.useMutation({
+    onSuccess: (data) => {
+      reset();
+      setJourney(data);
+    }
+  });
 
   const {
     data: DepartureQueryResults,
@@ -222,7 +229,7 @@ export default function TripSelection() {
       </CardFooter>
       <CardContent>
         <span className="relative overflow-x-scroll">
-          {journeys && JSON.stringify(journeys)}
+          {/* {journeys && JSON.stringify(journeys)} */}
         </span>
       </CardContent>
     </Card>
