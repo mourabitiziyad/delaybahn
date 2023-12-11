@@ -1,9 +1,9 @@
 // SearchDropdown.jsx
-import React, { useState, useEffect } from "react";
+import React, { useEffect } from "react";
 import { ScrollArea } from "./scroll-area";
-import { Spinner } from "./spinner";
 import { cn } from "~/lib/utils";
 import { Skeleton } from "./skeleton";
+import { Stop } from "~/types/types";
 
 export const SearchDropdown = ({
   showResults,
@@ -13,11 +13,21 @@ export const SearchDropdown = ({
   errorMessage,
   searchResults,
   onResultSelect,
-}) => {
+}:
+  Readonly<{
+    showResults: boolean;
+    setSearchVisibility: (value: boolean) => void;
+    isLoading: boolean;
+    isError: boolean;
+    errorMessage: string | undefined;
+    searchResults: any;
+    onResultSelect: (result: any) => void;
+  }>
+) => {
   // Hide results when clicked outside
   useEffect(() => {
-    const handleClickOutside = (event) => {
-      if (!event.target.closest(".search-dropdown")) {
+    const handleClickOutside = (event: MouseEvent) => {
+      if (!(event.target as Element).closest(".search-dropdown")) {
         setSearchVisibility(false);
       }
     };
@@ -45,7 +55,7 @@ export const SearchDropdown = ({
             )}
             {searchResults && (
               <div>
-                {searchResults.map((result, index) => (
+                {searchResults.map((result: Stop, index: number) => (
                   <div
                     key={index}
                     onClick={() => onResultSelect(result)}
