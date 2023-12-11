@@ -20,8 +20,8 @@ export const SearchDropdown = ({
     isLoading: boolean;
     isError: boolean;
     errorMessage: string | undefined;
-    searchResults: any;
-    onResultSelect: (result: any) => void;
+    searchResults: Stop[];
+    onResultSelect: (result: Stop) => void;
   }>
 ) => {
   // Hide results when clicked outside
