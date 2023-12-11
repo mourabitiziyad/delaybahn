@@ -68,7 +68,8 @@ interface Remark {
     summary: string;
 }
 
-interface Journey {
+export interface Journey {
+    walking?: boolean;
     origin: {
         type: string;
         id: string;
@@ -104,12 +105,21 @@ interface Journey {
     loadFactor: string;
 }
 
+
+
 export interface JourneyResponse {
-    journeys: Journey[];
-    refreshToken: string;
-    price: {
-        amount: number;
-        currency: string;
-        hint: string | null;
-    };
+    earlierRef: string | null;
+    journeys: {
+        legs: Journey[];
+        price: {
+            amount: number;
+            currency: string;
+            hint: string | null;
+        };
+        refreshToken: string;
+        type: string
+        remarks: Remark[];
+    }[];
+    realtimeDataUpdatedAt: number;
+    laterRef: string | null;
 }

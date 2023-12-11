@@ -24,16 +24,14 @@ import {
   formatDuration,
   intervalToDuration,
 } from "date-fns";
-import {
-  PersonStanding,
-  TrainFrontIcon,
-} from "lucide-react";
+import { PersonStanding, TrainFrontIcon } from "lucide-react";
 import { cn } from "~/lib/utils";
+import { Journey, JourneyResponse } from "~/types/types";
 
 export default function JourneyList() {
   const { journey, setJourney, reset } = useJourneyStore();
 
-  const convertSecondsToDuration = (seconds) => {
+  const convertSecondsToDuration = (seconds: number) => {
     // Convert seconds to a duration object
     const duration = intervalToDuration({ start: 0, end: seconds * 1000 });
 
@@ -41,7 +39,7 @@ export default function JourneyList() {
     return formatDuration(duration);
   };
 
-  const formatTripDuration = (departure, arrival) => {
+  const formatTripDuration = (departure: string, arrival: string) => {
     const departureDate = parseISO(departure);
     const arrivalDate = parseISO(arrival);
     const duration = differenceInMinutes(arrivalDate, departureDate);
@@ -50,15 +48,16 @@ export default function JourneyList() {
     return `${hours}h ${minutes}m`;
   };
 
-  const calculateDurationInMinutes = (start, end) => {
+  const calculateDurationInMinutes = (start: string, end: string) => {
     const startDate = parseISO(start);
     const endDate = parseISO(end);
-    return differenceInMinutes(endDate, startDate) as number;
+    return differenceInMinutes(endDate, startDate);
   };
 
-  const calculateLegRatio = (leg, totalDuration) => {
+  const calculateLegRatio = (leg: Journey, totalDuration: number) => {
     const legDuration = calculateDurationInMinutes(leg.departure, leg.arrival);
-    return Math.floor((legDuration / totalDuration).toFixed(4) * 100); // Keeping two decimal places
+    // Convert toFixed result back to a number
+    return Math.floor(Number((legDuration / totalDuration).toFixed(4)) * 100);
   };
 
   if (!journey?.journeys) {
@@ -73,9 +72,12 @@ export default function JourneyList() {
       </CardHeader>
       <CardContent>
         <Accordion type="single" collapsible className="w-full">
-          {journey.journeys.map((journey, index) => {
-            const firstLeg = journey.legs[0];
-            const lastLeg = journey.legs[journey.legs.length - 1];
+          {journey?.journeys?.map((journey, index) => {
+            if (!journey.legs || journey.legs.length === 0) {
+              return null;
+            }
+            const firstLeg = journey.legs[0] as Journey;
+            const lastLeg = journey.legs[journey.legs.length - 1] as Journey;
             const journeyDuration = formatTripDuration(
               firstLeg.departure,
               lastLeg.arrival,
@@ -134,9 +136,11 @@ export default function JourneyList() {
                         <span className="font-semiBold text-xs text-muted-foreground">
                           Expect arrival delays of about{" "}
                           <span className="font-bold">
-                            {Math.floor((Math.random() * 100).toFixed(1) / 3)}{" "}
-                          </span>
-                          minutes
+                            {Math.floor(
+                              Number((Math.random() * 100).toFixed(1)) / 3,
+                            )}{" "}
+                          </span>{" "}
+                          mins
                         </span>
                       </div>
                     </div>
@@ -145,7 +149,7 @@ export default function JourneyList() {
                     <ArrowRightIcon className="m-auto h-4 w-4 font-bold text-slate-50" />
                   </div>
                 </AccordionTrigger>
-                <div className="rounded-lg mb-4 bg-slate-200">
+                <div className="mb-4 rounded-lg bg-slate-200">
                   {journey?.legs?.map((leg, index) => (
                     <AccordionContent
                       className="ml-8 mt-4 w-3/4 rounded-md"
@@ -161,7 +165,9 @@ export default function JourneyList() {
                           ).fill(
                             <DotsVerticalIcon className="h-4 w-4 text-muted-foreground" />,
                           )}
-                          {index === (journey?.legs?.length - 1) && <DotFilledIcon className="h-4 w-4 text-muted-foreground" />}
+                          {index === journey?.legs?.length - 1 && (
+                            <DotFilledIcon className="h-4 w-4 text-muted-foreground" />
+                          )}
                         </div>
                         <div className="col-span-11">
                           <div className="flex h-full flex-col justify-between">
@@ -185,14 +191,14 @@ export default function JourneyList() {
                             </div>
                             <div>
                               {leg?.line && (
-                                <span className="flex my-1">
+                                <span className="my-1 flex">
                                   <TrainFrontIcon className="mr-1 h-4 w-4" />
                                   <span className="text-xs">
                                     {leg?.line?.name}
                                   </span>
                                 </span>
                               )}
-                              <span className="flex my-1">
+                              <span className="my-1 flex">
                                 <ClockIcon className="mr-1 h-4 w-4" />
                                 <span className="text-xs">
                                   {formatTripDuration(
@@ -207,7 +213,9 @@ export default function JourneyList() {
                                 </div>
                               )}
                             </div>
-                            {index === (journey?.legs?.length - 1) && <div>{leg.destination.name}</div>}
+                            {index === journey?.legs?.length - 1 && (
+                              <div>{leg.destination.name}</div>
+                            )}
                           </div>
                         </div>
                       </div>
