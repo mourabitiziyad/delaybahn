@@ -180,7 +180,7 @@ export default function JourneyList() {
                                 )}{" "}
                                 -{" "}
                                 {format(
-                                  parseISO(leg.plannedDeparture),
+                                  parseISO(leg.plannedArrival),
                                   "HH:mm",
                                 )}{" "}
                               </span>
