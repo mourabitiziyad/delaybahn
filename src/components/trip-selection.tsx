@@ -23,7 +23,7 @@ import { format } from "date-fns";
 import { api } from "~/trpc/react";
 import useDebounce from "~/hooks/useDebounce";
 import { SearchDropdown } from "./ui/search-dropdown";
-import { Stop } from "~/types/types";
+import { JourneyResponse, Stop } from "~/types/types";
 import { Spinner } from "./ui/spinner";
 
 export default function TripSelection() {
@@ -57,7 +57,7 @@ export default function TripSelection() {
     isError: isDepartureError,
     error: JourneyError,
   } = api.journey.searchJourney.useMutation({
-    onSuccess: (data) => {
+    onSuccess: (data: JourneyResponse) => {
       reset();
       setJourney(data);
     }
