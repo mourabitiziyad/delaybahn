@@ -106,7 +106,10 @@ export default function JourneyList() {
                       </div>
                       <div className="flex w-full">
                         {journey?.legs?.map((leg, index) => {
-                          const legRatio = calculateLegRatio(leg, totalDuration);
+                          const legRatio = calculateLegRatio(
+                            leg,
+                            totalDuration,
+                          );
                           return (
                             <div
                               key={index}
@@ -159,8 +162,14 @@ export default function JourneyList() {
                         <div className="col-span-1">
                           <DotFilledIcon className="h-4 w-4 text-muted-foreground" />
                           {Array(
-                            Math.ceil(
-                              Math.log2(calculateLegRatio(leg, totalDuration)),
+                            Math.floor(
+                              Math.min(
+                                Math.max(
+                                  calculateLegRatio(leg, totalDuration),
+                                  1,
+                                ),
+                                10,
+                              ),
                             ),
                           ).fill(
                             <DotsVerticalIcon className="h-4 w-4 text-muted-foreground" />,
@@ -179,15 +188,14 @@ export default function JourneyList() {
                                   "HH:mm",
                                 )}{" "}
                                 -{" "}
-                                {format(
-                                  parseISO(leg.plannedArrival),
-                                  "HH:mm",
-                                )}{" "}
+                                {format(parseISO(leg.plannedArrival), "HH:mm")}{" "}
                               </span>
-                              <span className="font-semibold text-red-500">
-                                ({format(parseISO(leg.departure), "HH:mm")} -{" "}
-                                {format(parseISO(leg.arrival), "HH:mm")})
-                              </span>
+                              {(leg.departureDelay || leg.arrivalDelay) ? (
+                                <span className="font-semibold text-red-500">
+                                  ({format(parseISO(leg.departure), "HH:mm")} -{" "}
+                                  {format(parseISO(leg.arrival), "HH:mm")})
+                                </span>
+                              ) : null}
                             </div>
                             <div>
                               {leg?.line && (
