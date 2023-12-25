@@ -9,19 +9,6 @@ const config = {
     images: {
         domains: ["lh3.googleusercontent.com"],
     },
-    async headers() {
-        return [
-            {
-                source: '/api/hafas/extract-stations',
-                headers: [
-                    {
-                        key: 'Cache-Control',
-                        value: 'no-cache, no-store, must-revalidate',
-                    },
-                ],
-            },
-        ];
-    },
 };
 
 export default config;
