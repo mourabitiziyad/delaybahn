@@ -64,18 +64,17 @@ model VerificationToken {
 }
 
 model Trip {
-  id        String   @id @default(cuid())
+  id        String   @default(cuid())
   depId     String
-  depName   String
+  depName   String?
   depDelay  Int?
   depDate   DateTime
   arrId     String
-  arrName   String
-  arrDelay  Int?
-  arrDate   DateTime
+  arrName   String?
   trainId   String
-  trainName String
-  remarks   String?
+  trainType String?
+  trainName String?
+  remarks   Json?
   cancelled Boolean  @default(false)
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
