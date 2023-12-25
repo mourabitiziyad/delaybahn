@@ -6,7 +6,7 @@ const userAgent = "station-extraction";
 const client = createClient(dbProfile, userAgent);
 
 export async function GET() {
-  let stops = await db.station.findMany();
+  const stops = await db.station.findMany();
   console.log(stops.length + " stops found");
   // loop over stops and extract arrivals
   // const departuresList: { id: string; depId: string | undefined; depName: string | undefined; depDate: string | undefined; arrId: string | undefined; arrName: string | undefined; trainId: string | undefined; trainName: string | undefined; cancelled: boolean | undefined; }[] = [];
@@ -49,20 +49,27 @@ export async function GET() {
     // store trip ids in departures in arrays
     for (const departure of departures) {
       if (departure.delay !== null || departure.cancelled) {
-        departuresList.push({
-          id: departure.tripId,
-          depId: departure.stop?.id!,
-          depName: departure.stop?.name || null,
-          depDelay: departure.delay ?? NaN,
-          depDate: new Date(departure.plannedWhen!),
-          arrId: departure.destination?.id!,
-          arrName: departure.destination?.name,
-          trainId: departure.line?.id!,
-          trainType: departure.line?.product,
-          trainName: departure.line?.name,
-          remarks: JSON.stringify(departure.remarks || null),
-          cancelled: departure.cancelled || false,
-        });
+        if (
+          departure.stop?.id &&
+          departure.destination?.id &&
+          departure.line?.id &&
+          departure.plannedWhen
+        ) {
+          departuresList.push({
+            id: departure.tripId,
+            depId: departure.stop?.id,
+            depName: departure.stop?.name || null,
+            depDelay: departure.delay ?? NaN,
+            depDate: new Date(departure.plannedWhen),
+            arrId: departure.destination?.id,
+            arrName: departure.destination?.name,
+            trainId: departure.line?.id,
+            trainType: departure.line?.product,
+            trainName: departure.line?.name,
+            remarks: JSON.stringify(departure.remarks || null),
+            cancelled: departure.cancelled || false,
+          });
+        }
       }
     }
     console.log("departures for " + stop.name + ": " + departures.length);
