@@ -133,6 +133,6 @@ export async function GET() {
 }
 
 export const fetchCache = 'force-no-store';
-export const revalidate = 0;
+export const revalidate = 10;
 
 // localhost:3000/api/hafas/extract-stations
