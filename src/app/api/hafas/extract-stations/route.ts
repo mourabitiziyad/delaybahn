@@ -11,7 +11,20 @@ export async function GET() {
   console.log(stops.length + " stops found");
   // loop over stops and extract arrivals
   // const departuresList: { id: string; depId: string | undefined; depName: string | undefined; depDate: string | undefined; arrId: string | undefined; arrName: string | undefined; trainId: string | undefined; trainName: string | undefined; cancelled: boolean | undefined; }[] = [];
-  const departuresList = [];
+  const departuresList: {
+    id: string;
+    depId: string | null;
+    depName: string | null;
+    depDate: Date;
+    depDelay: number;
+    arrId: string | undefined;
+    arrName: string | undefined;
+    trainId: string | undefined;
+    trainType: string | undefined;
+    trainName: string | undefined;
+    cancelled: boolean;
+    remarks: string;
+  }[] = [];
 
   const departurePromises = stops.map(async (stop) => {
     const { departures } = await client.departures(stop.id, {
@@ -30,25 +43,26 @@ export async function GET() {
         taxi: false,
       },
       when: undefined, // corresponds to Date.now()
-      duration: 150, // show departures for the next n mins
+      duration: 61, // show departures for the next n mins
       results: 1000, // show departures for the next n mins
     });
 
     // store trip ids in departures in arrays
     for (const departure of departures) {
-      if (!departure.delay && departure.delay !== 0 && departure.cancelled == false) {
+      if (departure.delay !== null || departure.cancelled) {
         departuresList.push({
           id: departure.tripId,
           depId: departure.stop?.id || null,
           depName: departure.stop?.name || null,
-          depDate: departure.plannedWhen,
           depDelay: departure.delay ?? NaN,
+          depDate: new Date(departure.plannedWhen!),
           arrId: departure.destination?.id,
           arrName: departure.destination?.name,
           trainId: departure.line?.id,
+          trainType: departure.line?.product,
           trainName: departure.line?.name,
+          remarks: JSON.stringify(departure.remarks || null),
           cancelled: departure.cancelled || false,
-          remarks: departure.remarks || [],
         });
       }
     }
@@ -56,28 +70,43 @@ export async function GET() {
   });
 
   await Promise.all(departurePromises);
+  if (departuresList.length === 0) {
+    console.log("No departures found");
+    return Response.json(departuresList);
+  } else {
+    const data = await db.trip.createMany({
+      data: departuresList,
+      skipDuplicates: true,
+    });
+    console.log(data.count + " departures stored in database");
+  }
   console.log("Done");
 
-  return Response.json(departuresList);
+  const uniqueDepartures = departuresList.filter(
+    (departure, index, self) =>
+      index ===
+      self.findIndex(
+        (t) =>
+          t.id === departure.id &&
+          t.depId === departure.depId &&
+          t.depName === departure.depName &&
+          t.depDate === departure.depDate &&
+          t.arrId === departure.arrId &&
+          t.arrName === departure.arrName &&
+          t.depDelay === departure.depDelay &&
+          t.trainId === departure.trainId &&
+          t.trainName === departure.trainName &&
+          t.cancelled === departure.cancelled,
+      ),
+  );
+  console.log("unique departures: " + uniqueDepartures.length);
+  console.log(
+    "duplicate departures: " +
+      (departuresList.length - uniqueDepartures.length),
+  );
+  console.log("total departures: " + departuresList.length);
 
-  // return Response.json(await client.departures(stops[1].id, {
-  //     linesOfStops: false,
-  //     remarks: true,
-  //     products: {
-  //         nationalExpress: true,
-  //         national: true,
-  //         regionalExpress: true,
-  //         regional: true,
-  //         suburban: false,
-  //         bus: false,
-  //         ferry: true,
-  //         subway: false,
-  //         tram: false,
-  //         taxi: false,
-  //     },
-  //     when: undefined, // corresponds to Date.now()
-  //     duration: 150, // show departures for the next n mins
-  //     results: 1000, // show departures for the next n mins
-  // }));
+  return Response.json(departuresList || []);
 }
+
 // localhost:3000/api/hafas/extract-stations
