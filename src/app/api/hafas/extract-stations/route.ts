@@ -5,7 +5,7 @@ import { profile as dbProfile } from "hafas-client/p/db/index.js";
 const userAgent = "station-extraction";
 const client = createClient(dbProfile, userAgent);
 
-export async function GET() {
+export async function POST() {
   let tripsAddedCount = 0;
   const stops = await db.station.findMany();
   console.log(stops.length + " stops found");
@@ -131,9 +131,5 @@ export async function GET() {
 
 
 }
-
-export const fetchCache = 'force-no-store';
-export const dynamic = 'force-dynamic';
-export const revalidate = 10;
 
 // localhost:3000/api/hafas/extract-stations
