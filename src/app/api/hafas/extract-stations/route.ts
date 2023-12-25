@@ -1,5 +1,4 @@
 import { db } from "~/server/db";
-import { api } from "~/trpc/server";
 import { createClient } from "hafas-client";
 import { profile as dbProfile } from "hafas-client/p/db/index.js";
 
@@ -13,13 +12,13 @@ export async function GET() {
   // const departuresList: { id: string; depId: string | undefined; depName: string | undefined; depDate: string | undefined; arrId: string | undefined; arrName: string | undefined; trainId: string | undefined; trainName: string | undefined; cancelled: boolean | undefined; }[] = [];
   const departuresList: {
     id: string;
-    depId: string | null;
+    depId: string;
     depName: string | null;
     depDate: Date;
     depDelay: number;
-    arrId: string | undefined;
+    arrId: string;
     arrName: string | undefined;
-    trainId: string | undefined;
+    trainId: string;
     trainType: string | undefined;
     trainName: string | undefined;
     cancelled: boolean;
@@ -52,13 +51,13 @@ export async function GET() {
       if (departure.delay !== null || departure.cancelled) {
         departuresList.push({
           id: departure.tripId,
-          depId: departure.stop?.id || null,
+          depId: departure.stop?.id!,
           depName: departure.stop?.name || null,
           depDelay: departure.delay ?? NaN,
           depDate: new Date(departure.plannedWhen!),
-          arrId: departure.destination?.id,
+          arrId: departure.destination?.id!,
           arrName: departure.destination?.name,
-          trainId: departure.line?.id,
+          trainId: departure.line?.id!,
           trainType: departure.line?.product,
           trainName: departure.line?.name,
           remarks: JSON.stringify(departure.remarks || null),
