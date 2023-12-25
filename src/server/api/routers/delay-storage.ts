@@ -126,9 +126,10 @@ export const delayExtractionRouter = createTRPCRouter({
       return { success: true, message: `${tripsAddedCount} Added to Database` };
     } catch (error) {
       console.log(error);
-      return (
-        { success: false, message: error }
-      );
+      return new TRPCError({
+        code: "INTERNAL_SERVER_ERROR",
+        message: "Something went wrong: " + JSON.stringify(error),
+      });
     }
   }),
 });
