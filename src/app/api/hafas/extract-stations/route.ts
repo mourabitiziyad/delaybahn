@@ -72,7 +72,7 @@ export async function GET() {
         }
       }
     }
-    // console.log("departures for " + stop.name + ": " + departures.length);
+    console.log("departures for " + stop.name + ": " + departures.length);
   });
 
   await Promise.all(departurePromises);
@@ -84,7 +84,9 @@ export async function GET() {
       data: departuresList,
       skipDuplicates: true,
     });
-    console.log(data.count + " departures stored in database with Prisma skipDuplicates");
+    console.log(
+      data.count + " departures stored in database with PrismaskipDuplicates",
+    );
   }
   console.log("Done");
 
@@ -112,7 +114,9 @@ export async function GET() {
   );
   console.log("total departures: " + departuresList.length);
 
-  return Response.json(departuresList || []);
+  return Response.json(
+    departuresList.length > 0 ? { success: true } : { success: false },
+  );
 }
 
 // localhost:3000/api/hafas/extract-stations
