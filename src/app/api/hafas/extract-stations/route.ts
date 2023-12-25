@@ -72,7 +72,7 @@ export async function GET() {
         }
       }
     }
-    console.log("departures for " + stop.name + ": " + departures.length);
+    // console.log("departures for " + stop.name + ": " + departures.length);
   });
 
   await Promise.all(departurePromises);
@@ -84,7 +84,7 @@ export async function GET() {
       data: departuresList,
       skipDuplicates: true,
     });
-    console.log(data.count + " departures stored in database");
+    console.log(data.count + " departures stored in database with Prisma skipDuplicates");
   }
   console.log("Done");
 
@@ -105,9 +105,9 @@ export async function GET() {
           t.cancelled === departure.cancelled,
       ),
   );
-  console.log("unique departures: " + uniqueDepartures.length);
+  console.log("unique departures in manual filter: " + uniqueDepartures.length);
   console.log(
-    "duplicate departures: " +
+    "duplicate departures in manual filter: " +
       (departuresList.length - uniqueDepartures.length),
   );
   console.log("total departures: " + departuresList.length);
