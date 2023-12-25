@@ -60,8 +60,8 @@ dependencies:
     specifier: ^2.30.0
     version: 2.30.0
   hafas-client:
-    specifier: ^6.2.0
-    version: 6.2.0
+    specifier: git+https://github.com/mourabitiziyad/hafas-client
+    version: github.com/mourabitiziyad/hafas-client/1537cc30d0e5118b84ec6b7046351a3f1a1ce28b
   lucide-react:
     specifier: ^0.293.0
     version: 0.293.0(react@18.2.0)
@@ -2408,30 +2408,6 @@ packages:
     resolution: {integrity: sha512-EtKwoO6kxCL9WO5xipiHTZlSzBm7WLT627TqC/uVRd0HKmq8NXyebnNYxDoBi7wt8eTWrUrKXCOVaFq9x1kgag==}
     dev: true
 
-  /hafas-client@6.2.0:
-    resolution: {integrity: sha512-ktSCsWsYdn9iN0d8+zNoilLgnvpa5A9JGwfEq7MwJI8FsG5HAORSEVzV0oq487j///usmyp5AqZS13M774NEvQ==}
-    engines: {node: '>=16'}
-    dependencies:
-      '@derhuerst/br2nl': 1.0.0
-      '@derhuerst/round-robin-scheduler': 1.0.4
-      content-type: 1.0.5
-      create-hash: 1.2.0
-      cross-fetch: 4.0.0
-      google-polyline: 1.0.3
-      gps-distance: 0.0.4
-      https-proxy-agent: 7.0.2
-      lodash: 4.17.21
-      luxon: 3.4.4
-      object-scan: 13.9.3
-      p-retry: 6.2.0
-      p-throttle: 5.1.0
-      qs: 6.11.2
-      slugg: 1.2.1
-    transitivePeerDependencies:
-      - encoding
-      - supports-color
-    dev: false
-
   /has-bigints@1.0.2:
     resolution: {integrity: sha512-tSvCKtBr9lkF0Ex0aQiP9N+OpV4zi2r/Nee5VkRDbaqv35RLYMzbwQfFSZZH0kR+Rd6302UJZ2p/bJCEoR3VoQ==}
     dev: true
@@ -4080,4 +4056,30 @@ packages:
       '@types/react': 18.2.34
       react: 18.2.0
       use-sync-external-store: 1.2.0(react@18.2.0)
+    dev: false
+
+  github.com/mourabitiziyad/hafas-client/1537cc30d0e5118b84ec6b7046351a3f1a1ce28b:
+    resolution: {tarball: https://codeload.github.com/mourabitiziyad/hafas-client/tar.gz/1537cc30d0e5118b84ec6b7046351a3f1a1ce28b}
+    name: hafas-client
+    version: 6.2.0
+    engines: {node: '>=16'}
+    dependencies:
+      '@derhuerst/br2nl': 1.0.0
+      '@derhuerst/round-robin-scheduler': 1.0.4
+      content-type: 1.0.5
+      create-hash: 1.2.0
+      cross-fetch: 4.0.0
+      google-polyline: 1.0.3
+      gps-distance: 0.0.4
+      https-proxy-agent: 7.0.2
+      lodash: 4.17.21
+      luxon: 3.4.4
+      object-scan: 13.9.3
+      p-retry: 6.2.0
+      p-throttle: 5.1.0
+      qs: 6.11.2
+      slugg: 1.2.1
+    transitivePeerDependencies:
+      - encoding
+      - supports-color
     dev: false
