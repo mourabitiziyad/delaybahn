@@ -1,4 +1,3 @@
-import { z } from "zod";
 import { createTRPCRouter, publicProcedure } from "../trpc";
 import { TRPCError } from "@trpc/server";
 import { db } from "~/server/db";
@@ -124,12 +123,12 @@ export const delayExtractionRouter = createTRPCRouter({
       );
       console.log("total departures: " + departuresList.length);
       return { success: true, message: `${tripsAddedCount} Added to Database` };
-    } catch (error) {
-      console.log(error);
+    } catch (error: any) {
+      console.error(error);
       return new TRPCError({
         code: "INTERNAL_SERVER_ERROR",
-        message: "Something went wrong: " + JSON.stringify(error),
+        message: "Something went wrong: " + error?.message,
       });
     }
   }),
-});
+})
