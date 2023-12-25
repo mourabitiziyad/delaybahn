@@ -6,6 +6,7 @@ const userAgent = "station-extraction";
 const client = createClient(dbProfile, userAgent);
 
 export async function GET() {
+  let tripsAddedCount = 0;
   const stops = await db.station.findMany();
   console.log(stops.length + " stops found");
   // loop over stops and extract arrivals
@@ -84,9 +85,8 @@ export async function GET() {
       data: departuresList,
       skipDuplicates: true,
     });
-    console.log(
-      data.count + " departures stored in database with PrismaskipDuplicates",
-    );
+    tripsAddedCount = data.count;
+    console.log(data.count + " departures stored in database with Prisma skipDuplicates");
   }
   console.log("Done");
 
@@ -114,9 +114,7 @@ export async function GET() {
   );
   console.log("total departures: " + departuresList.length);
 
-  return Response.json(
-    departuresList.length > 0 ? { success: true } : { success: false },
-  );
+  return Response.json(departuresList.length > 0 ? {success: true, message: `${tripsAddedCount} Added to Database`} : {success: false});
 }
 
 // localhost:3000/api/hafas/extract-stations
