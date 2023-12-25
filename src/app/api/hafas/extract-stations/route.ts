@@ -114,7 +114,12 @@ export async function GET() {
   );
   console.log("total departures: " + departuresList.length);
 
-  return Response.json(departuresList.length > 0 ? {success: true, message: `${tripsAddedCount} Added to Database`} : {success: false});
+  return new Response(JSON.stringify(departuresList.length > 0 ? {success: true, message: `${tripsAddedCount} Added to Database`} : {success: false}), {
+    headers: {
+      'Cache-Control': 'no-cache, no-store, must-revalidate',
+    },
+  });
+  
 }
 
 // localhost:3000/api/hafas/extract-stations
