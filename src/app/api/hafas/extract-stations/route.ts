@@ -122,4 +122,6 @@ export async function GET() {
   
 }
 
+export const revalidate = 0;
+
 // localhost:3000/api/hafas/extract-stations
