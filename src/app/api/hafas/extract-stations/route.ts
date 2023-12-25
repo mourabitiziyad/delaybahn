@@ -118,8 +118,9 @@ export async function GET() {
     headers: {
       'Cache-Control': 'no-cache, no-store, must-revalidate',
     },
-  });
-  
+  }); 
 }
+
+export const fetchCache = 'force-no-store';
 
 // localhost:3000/api/hafas/extract-stations
