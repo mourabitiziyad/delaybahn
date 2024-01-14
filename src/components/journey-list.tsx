@@ -86,7 +86,7 @@ export default function JourneyList() {
                       <div className="flex justify-between">
                         <span className="text-sm font-medium text-muted-foreground">
                           {format(parseISO(firstLeg.departure), "HH:mm")} -{" "}
-                          {format(parseISO(firstLeg.arrival), "HH:mm")} |{" "}
+                          {format(parseISO(lastLeg.arrival), "HH:mm")} |{" "}
                           {journeyDuration} | {journey.legs.length - 1} Transfer
                           {journey.legs.length - 1 > 1 ? "s" : ""}
                         </span>
@@ -231,7 +231,6 @@ export default function JourneyList() {
                               {/* Timeline dot and line */}
                               <div className="mr-4 flex flex-col items-center">
                                 {/* <div className="h-3 w-3 rounded-full bg-slate-500"></div> */}
-                                {/* Set a minimum height on the line */}
                                 <div
                                   className="w-0.5 border-l-2 border-dashed border-slate-500 bg-transparent"
                                   style={{ height: "100%" }}
