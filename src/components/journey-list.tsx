@@ -65,7 +65,7 @@ export default function JourneyList() {
   }
 
   return (
-    <Card className="mx-auto w-full max-w-2xl py-4">
+    <Card className="mx-auto w-full max-w-4xl py-4">
       <CardHeader>
         <CardTitle>Journey List</CardTitle>
         <CardDescription>Available Journeys.</CardDescription>
@@ -96,9 +96,8 @@ export default function JourneyList() {
                         <span className="text-sm font-medium text-muted-foreground">
                           {format(parseISO(firstLeg.departure), "HH:mm")} -{" "}
                           {format(parseISO(firstLeg.arrival), "HH:mm")} |{" "}
-                          {journeyDuration}
-                          {/* {journey.legs.length - 1} Transfer
-                        {journey.legs.length - 1 > 1 ? "s" : ""} */}
+                          {journeyDuration} | {journey.legs.length - 1} Transfer
+                          {journey.legs.length - 1 > 1 ? "s" : ""}
                         </span>
                         <span className="mr-4 text-sm font-medium text-muted-foreground">
                           {format(parseISO(firstLeg.departure), "EEEE MMM do")}
@@ -128,7 +127,6 @@ export default function JourneyList() {
                               ) : (
                                 <p className="m-auto mx-1 text-xs font-bold">
                                   {leg.line?.name}
-                                  {/* {legRatio} */}
                                 </p>
                               )}
                             </div>
@@ -153,82 +151,77 @@ export default function JourneyList() {
                   </div>
                 </AccordionTrigger>
                 <div className="mb-4 rounded-lg bg-slate-200">
+                  <AccordionContent
+                    className="ml-8 w-3/4 rounded-md py-4"
+                  >
                   {journey?.legs?.map((leg, index) => (
-                    <AccordionContent
-                      className="ml-8 mt-4 w-3/4 rounded-md"
-                      key={index}
-                    >
-                      <div className="grid grid-cols-12">
-                        <div className="col-span-1">
-                          <DotFilledIcon className="h-4 w-4 text-muted-foreground" />
-                          {Array(
-                            Math.floor(
-                              Math.min(
-                                Math.max(
-                                  calculateLegRatio(leg, totalDuration),
-                                  1,
-                                ),
-                                10,
-                              ),
-                            ),
-                          ).fill(
-                            <DotsVerticalIcon className="h-4 w-4 text-muted-foreground" />,
-                          )}
+                      <div className="flex gap-1" key={index}>
+                        {/* Timeline dot and line */}
+                        <div className="mr-4 flex flex-col items-center gap-0">
+                          <div>
+                            <div className="h-3 w-3 rounded-full bg-slate-500"></div>
+                          </div>
+                          {/* Set a minimum height on the line */}
+                          <div
+                            className="w-0.5 bg-gray-300"
+                            style={{ height: "100%" }}
+                          ></div>
                           {index === journey?.legs?.length - 1 && (
-                            <DotFilledIcon className="h-4 w-4 text-muted-foreground" />
+                            <div>
+                              <div className="h-3 w-3 rounded-full bg-slate-500"></div>
+                            </div>
                           )}
                         </div>
-                        <div className="col-span-11">
-                          <div className="flex h-full flex-col justify-between">
-                            <div>
-                              <p>{leg.origin.name}</p>
-                              <span className="font-semibold">
-                                {format(
-                                  parseISO(leg.plannedDeparture),
-                                  "HH:mm",
-                                )}{" "}
-                                -{" "}
-                                {format(parseISO(leg.plannedArrival), "HH:mm")}{" "}
+                        {/* Content */}
+                        <div>
+                          <div>
+                            <p className="text-lg font-semibold text-gray-800">
+                              {leg.origin.name}
+                            </p>
+                            <span className="font-semibold">
+                              {format(parseISO(leg.plannedDeparture), "HH:mm")}{" "}
+                              - {format(parseISO(leg.plannedArrival), "HH:mm")}{" "}
+                            </span>
+                            {leg.arrivalDelay || leg.departureDelay ? (
+                              <span className="font-semibold text-red-500">
+                                ({format(parseISO(leg.departure), "HH:mm")} -{" "}
+                                {format(parseISO(leg.arrival), "HH:mm")})
                               </span>
-                              {(leg.arrivalDelay || leg.departureDelay) ? (
-                                <span className="font-semibold text-red-500">
-                                  ({format(parseISO(leg.departure), "HH:mm")} -{" "}
-                                  {format(parseISO(leg.arrival), "HH:mm")})
-                                </span>
-                              ) : null}
-                            </div>
-                            <div>
-                              {leg?.line && (
-                                <span className="my-1 flex">
-                                  <TrainFrontIcon className="mr-1 h-4 w-4" />
-                                  <span className="text-xs">
-                                    {leg?.line?.name}
-                                  </span>
-                                </span>
-                              )}
+                            ) : null}
+                          </div>
+
+                          <div className="flex items-center font-semibold ">
+                            {leg?.line && (
                               <span className="my-1 flex">
-                                <ClockIcon className="mr-1 h-4 w-4" />
+                                <TrainFrontIcon className="mr-1 h-4 w-4" />
                                 <span className="text-xs">
-                                  {formatTripDuration(
-                                    leg.departure,
-                                    leg.arrival,
-                                  )}
+                                  {leg?.line?.name}
                                 </span>
                               </span>
-                              {!leg?.line && leg.walking && (
-                                <div className="flex items-center text-center">
-                                  <PersonStanding className="h-6 w-6" />
-                                </div>
-                              )}
-                            </div>
+                            )}
+                          </div>
+                          <span className="my-1 flex">
+                            <ClockIcon className="mr-1 h-4 w-4" />
+                            <span className="text-xs">
+                              {formatTripDuration(leg.departure, leg.arrival)}
+                            </span>
+                          </span>
+                          <div className="mt-2">
+                            {!leg?.line && leg.walking && (
+                              <div className="flex items-center text-center">
+                                <PersonStanding className="h-6 w-6" />
+                              </div>
+                            )}
                             {index === journey?.legs?.length - 1 && (
-                              <div>{leg.destination.name}</div>
+                              <p className="text-lg font-semibold text-gray-800">
+                                {leg.destination.name}
+                              </p>
                             )}
                           </div>
                         </div>
                       </div>
-                    </AccordionContent>
                   ))}
+                    </AccordionContent>
                 </div>
               </AccordionItem>
             );

@@ -226,11 +226,6 @@ export default function TripSelection() {
           {isJourneyLoading && <Spinner className="ml-2 text-white" />}
         </Button>
       </CardFooter>
-      <CardContent>
-        <span className="relative overflow-x-scroll">
-          {/* {journeys && JSON.stringify(journeys)} */}
-        </span>
-      </CardContent>
     </Card>
   );
 }
