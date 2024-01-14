@@ -11,32 +11,24 @@ import {
 import { Button } from "./ui/button";
 import { Accordion, AccordionContent, AccordionItem } from "./ui/accordion";
 import { AccordionTrigger } from "@radix-ui/react-accordion";
-import {
-  ArrowRightIcon,
-  ClockIcon,
-  DotFilledIcon,
-  DotsVerticalIcon,
-} from "@radix-ui/react-icons";
-import {
-  format,
-  parseISO,
-  differenceInMinutes,
-  formatDuration,
-  intervalToDuration,
-} from "date-fns";
+import { ArrowRightIcon, ClockIcon } from "@radix-ui/react-icons";
+import { format, parseISO, differenceInMinutes } from "date-fns";
 import { PersonStanding, TrainFrontIcon } from "lucide-react";
 import { cn } from "~/lib/utils";
-import { Journey, JourneyResponse } from "~/types/types";
+import { Journey } from "~/types/types";
 
 export default function JourneyList() {
-  const { journey, setJourney, reset } = useJourneyStore();
+  const { journey, reset } = useJourneyStore();
 
-  const convertSecondsToDuration = (seconds: number) => {
-    // Convert seconds to a duration object
-    const duration = intervalToDuration({ start: 0, end: seconds * 1000 });
-
-    // Format the duration as a string "x minutes y seconds"
-    return formatDuration(duration);
+  const calculateWaitTime = (
+    currentLegArrival: string,
+    nextLegDeparture: string,
+  ) => {
+    if (!currentLegArrival || !nextLegDeparture) return null;
+    const arrivalDate = parseISO(currentLegArrival);
+    const departureDate = parseISO(nextLegDeparture);
+    const waitTimeMinutes = differenceInMinutes(departureDate, arrivalDate);
+    return waitTimeMinutes > 0 ? waitTimeMinutes : null;
   };
 
   const formatTripDuration = (departure: string, arrival: string) => {
@@ -92,7 +84,6 @@ export default function JourneyList() {
                   <div className="w-full">
                     <div className="text-left">
                       <div className="flex justify-between">
-                        {/* <span className="text-sm">{format(parseISO(firstLeg.departure), 'p')} - {format(parseISO(lastLeg.arrival), 'p')} | {journeyDuration} | Transfers: {journey.legs.length}</span> */}
                         <span className="text-sm font-medium text-muted-foreground">
                           {format(parseISO(firstLeg.departure), "HH:mm")} -{" "}
                           {format(parseISO(firstLeg.arrival), "HH:mm")} |{" "}
@@ -151,77 +142,110 @@ export default function JourneyList() {
                   </div>
                 </AccordionTrigger>
                 <div className="mb-4 rounded-lg bg-slate-200">
-                  <AccordionContent
-                    className="ml-8 w-3/4 rounded-md py-4"
-                  >
-                  {journey?.legs?.map((leg, index) => (
-                      <div className="flex gap-1" key={index}>
-                        {/* Timeline dot and line */}
-                        <div className="mr-4 flex flex-col items-center gap-0">
-                          <div>
-                            <div className="h-3 w-3 rounded-full bg-slate-500"></div>
-                          </div>
-                          {/* Set a minimum height on the line */}
+                  <AccordionContent className="w-full rounded-md py-4">
+                    {journey?.legs?.map((leg, index) => {
+                      const nextLeg = journey?.legs[index + 1];
+                      const waitTime = calculateWaitTime(
+                        leg.arrival,
+                        nextLeg?.departure ?? "",
+                      );
+                      return (
+                        <>
                           <div
-                            className="w-0.5 bg-gray-300"
-                            style={{ height: "100%" }}
-                          ></div>
-                          {index === journey?.legs?.length - 1 && (
-                            <div>
-                              <div className="h-3 w-3 rounded-full bg-slate-500"></div>
+                            className="flex w-full gap-1 bg-slate-100 pl-8"
+                            key={index}
+                          >
+                            {/* Timeline dot and line */}
+                            <div className="mr-4 flex flex-col items-center gap-0">
+                              {/* <div className="h-3 w-3 rounded-full bg-slate-500"></div> */}
+                              <div
+                                className="w-0.5 bg-gray-300"
+                                style={{ height: "100%" }}
+                              ></div>
+                              {/* {index === journey?.legs?.length - 1 && (
+                                <div>
+                                  <div className="h-3 w-3 rounded-full bg-slate-500"></div>
+                                </div>
+                              )} */}
                             </div>
-                          )}
-                        </div>
-                        {/* Content */}
-                        <div>
-                          <div>
-                            <p className="text-lg font-semibold text-gray-800">
-                              {leg.origin.name}
-                            </p>
-                            <span className="font-semibold">
-                              {format(parseISO(leg.plannedDeparture), "HH:mm")}{" "}
-                              - {format(parseISO(leg.plannedArrival), "HH:mm")}{" "}
-                            </span>
-                            {leg.arrivalDelay || leg.departureDelay ? (
-                              <span className="font-semibold text-red-500">
-                                ({format(parseISO(leg.departure), "HH:mm")} -{" "}
-                                {format(parseISO(leg.arrival), "HH:mm")})
-                              </span>
-                            ) : null}
-                          </div>
+                            {/* Content */}
+                            <div className="my-2">
+                              <div>
+                                <p className="text-lg font-semibold text-gray-800">
+                                  {leg.origin.name}
+                                </p>
+                                <span className="font-semibold">
+                                  {format(
+                                    parseISO(leg.plannedDeparture),
+                                    "HH:mm",
+                                  )}{" "}
+                                  -{" "}
+                                  {format(
+                                    parseISO(leg.plannedArrival),
+                                    "HH:mm",
+                                  )}{" "}
+                                </span>
+                                {leg.arrivalDelay || leg.departureDelay ? (
+                                  <span className="font-semibold text-red-500">
+                                    ({format(parseISO(leg.departure), "HH:mm")}{" "}
+                                    - {format(parseISO(leg.arrival), "HH:mm")})
+                                  </span>
+                                ) : null}
+                              </div>
 
-                          <div className="flex items-center font-semibold ">
-                            {leg?.line && (
+                              <div className="flex items-center font-semibold ">
+                                {leg?.line && (
+                                  <span className="my-1 flex">
+                                    <TrainFrontIcon className="mr-1 h-4 w-4" />
+                                    <span className="text-xs">
+                                      {leg?.line?.name}
+                                    </span>
+                                  </span>
+                                )}
+                              </div>
                               <span className="my-1 flex">
-                                <TrainFrontIcon className="mr-1 h-4 w-4" />
+                                <ClockIcon className="mr-1 h-4 w-4" />
                                 <span className="text-xs">
-                                  {leg?.line?.name}
+                                  {formatTripDuration(
+                                    leg.departure,
+                                    leg.arrival,
+                                  )}
                                 </span>
                               </span>
-                            )}
-                          </div>
-                          <span className="my-1 flex">
-                            <ClockIcon className="mr-1 h-4 w-4" />
-                            <span className="text-xs">
-                              {formatTripDuration(leg.departure, leg.arrival)}
-                            </span>
-                          </span>
-                          <div className="mt-2">
-                            {!leg?.line && leg.walking && (
-                              <div className="flex items-center text-center">
-                                <PersonStanding className="h-6 w-6" />
+                              <div className="mt-2">
+                                {!leg?.line && leg.walking && (
+                                  <div className="flex items-center text-center">
+                                    <PersonStanding className="h-6 w-6" />
+                                  </div>
+                                )}
+                                {index === journey?.legs?.length - 1 && (
+                                  <p className="text-lg font-semibold text-gray-800">
+                                    {leg.destination.name}
+                                  </p>
+                                )}
                               </div>
-                            )}
-                            {index === journey?.legs?.length - 1 && (
-                              <p className="text-lg font-semibold text-gray-800">
-                                {leg.destination.name}
-                              </p>
-                            )}
+                            </div>
                           </div>
-                        </div>
-                      </div>
-                  ))}
-                    </AccordionContent>
+                          {waitTime && (
+                            <div className="flex gap-1 pl-8" key={index}>
+                              {/* Timeline dot and line */}
+                              <div className="mr-4 flex flex-col items-center">
+                                {/* <div className="h-3 w-3 rounded-full bg-slate-500"></div> */}
+                                {/* Set a minimum height on the line */}
+                                <div
+                                  className="w-0.5 border-l-2 border-dashed border-slate-500 bg-transparent"
+                                  style={{ height: "100%" }}
+                                ></div>
+                              </div>
+                              <div className="bg-slate-10 flex h-24 w-full flex-col justify-center">
+                                Transfer — Wait Time {waitTime} mins
+                              </div>
+                            </div>
+                          )}
+                        </>
+                      );
+                    })}
+                  </AccordionContent>
                 </div>
               </AccordionItem>
             );
