@@ -1,4 +1,5 @@
 import JourneyList from "~/components/journey-list";
+import Stats from "~/components/stats-data";
 import TripSelection from "~/components/trip-selection";
 import { getServerAuthSession } from "~/server/auth";
 
@@ -11,7 +12,10 @@ export default async function Home() {
         <h1 className="text-5xl font-extrabold tracking-tight sm:text-[5rem]">
           Plan Your Trip
         </h1>
-        <TripSelection />
+        <div className="flex flex-1 w-full gap-2">
+          <TripSelection />
+          <Stats />
+        </div>
         <JourneyList />
       </div>
     </main>
