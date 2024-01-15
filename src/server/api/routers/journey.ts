@@ -111,7 +111,7 @@ export const journeyRouter = createTRPCRouter({
             `https://v6.db.transport.rest/journeys?from=${input.from}&to=${input.to}&laterRef=${data.laterRef}&language=en`,
           );
           const nextPageData = await nextPage.json();
-          if (nextPageData) {
+          if (nextPageData?.journeys) {
             data.journeys.push(...nextPageData.journeys);
             return data;
           }
