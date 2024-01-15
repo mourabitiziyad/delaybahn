@@ -1,6 +1,6 @@
 "use client";
 import React from "react";
-import { useJourneyStore } from "~/store/useStore";
+import { useDelayStore, useJourneyStore } from "~/store/useStore";
 import {
   Card,
   CardContent,
@@ -16,9 +16,11 @@ import { format, parseISO, differenceInMinutes } from "date-fns";
 import { PersonStanding, TrainFrontIcon } from "lucide-react";
 import { cn } from "~/lib/utils";
 import { Journey } from "~/types/types";
+import { Badge } from "./ui/badge";
 
 export default function JourneyList() {
   const { journey, reset } = useJourneyStore();
+  const { delays } = useDelayStore();
 
   const calculateWaitTime = (
     currentLegArrival: string,
@@ -30,6 +32,19 @@ export default function JourneyList() {
     const waitTimeMinutes = differenceInMinutes(departureDate, arrivalDate);
     return waitTimeMinutes > 0 ? waitTimeMinutes : null;
   };
+
+  function formatDuration(seconds: number): string {
+    const hours = Math.floor(seconds / 3600);
+    const minutes = Math.floor((seconds % 3600) / 60);
+    const remainingSeconds = seconds % 60;
+
+    // Format each part to ensure it has leading zeros if needed
+    const formattedHours = hours.toString().padStart(2, "0");
+    const formattedMinutes = minutes.toString().padStart(2, "0");
+    const formattedSeconds = remainingSeconds.toString().padStart(2, "0");
+
+    return `${formattedHours}:${formattedMinutes}:${formattedSeconds}`;
+  }
 
   const formatTripDuration = (departure: string, arrival: string) => {
     const departureDate = parseISO(departure);
@@ -100,9 +115,16 @@ export default function JourneyList() {
                             leg,
                             totalDuration,
                           );
+                          // TODO
+                          const delay = delays?.find(
+                            (delay) =>
+                              delay.depId === leg.origin.id &&
+                              delay.arrId === leg.destination.id &&
+                              delay.trainType === leg.line?.product,
+                          );
                           return (
                             <div
-                              key={index}
+                              key={leg.tripId}
                               className={cn(
                                 `my-2 mr-1 flex h-8 flex-auto justify-center rounded-md`,
                                 leg.walking
@@ -117,7 +139,7 @@ export default function JourneyList() {
                                 </div>
                               ) : (
                                 <p className="m-auto mx-1 text-xs font-bold">
-                                  {leg.line?.name}
+                                  {leg.line?.name} {leg?.transfer && "— Transfer"}
                                 </p>
                               )}
                             </div>
@@ -126,13 +148,6 @@ export default function JourneyList() {
                       </div>
                       <div>
                         <span className="font-semiBold text-xs text-muted-foreground">
-                          Expect arrival delays of about{" "}
-                          <span className="font-bold">
-                            {Math.floor(
-                              Number((Math.random() * 100).toFixed(1)) / 3,
-                            )}{" "}
-                          </span>{" "}
-                          mins
                         </span>
                       </div>
                     </div>
@@ -149,81 +164,137 @@ export default function JourneyList() {
                         leg.arrival,
                         nextLeg?.departure ?? "",
                       );
+                      const delay = delays?.find(
+                        (delay) =>
+                          delay.depId === leg.origin.id &&
+                          delay.arrId === leg.destination.id &&
+                          delay.trainType === leg.line?.product,
+                      );
                       return (
                         <>
                           <div
-                            className="flex w-full gap-1 bg-slate-100 pl-8"
+                            className="grid grid-cols-4 bg-slate-100"
                             key={index}
                           >
-                            {/* Timeline dot and line */}
-                            <div className="mr-4 flex flex-col items-center gap-0">
-                              {/* <div className="h-3 w-3 rounded-full bg-slate-500"></div> */}
-                              <div
-                                className="w-0.5 bg-gray-300"
-                                style={{ height: "100%" }}
-                              ></div>
-                              {/* {index === journey?.legs?.length - 1 && (
-                                <div>
-                                  <div className="h-3 w-3 rounded-full bg-slate-500"></div>
+                            <div className="col-span-2 grid">
+                              <div className="flex w-full gap-1 pl-8">
+                                {/* Timeline dot and line */}
+                                <div className="mr-4 flex flex-col items-center gap-0">
+                                  {/* <div className="h-3 w-3 rounded-full bg-slate-500"></div> */}
+                                  <div
+                                    className="w-0.5 bg-gray-300"
+                                    style={{ height: "100%" }}
+                                  ></div>
                                 </div>
-                              )} */}
-                            </div>
-                            {/* Content */}
-                            <div className="my-2">
-                              <div>
-                                <p className="text-lg font-semibold text-gray-800">
-                                  {leg.origin.name}
-                                </p>
-                                <span className="font-semibold">
-                                  {format(
-                                    parseISO(leg.plannedDeparture),
-                                    "HH:mm",
-                                  )}{" "}
-                                  -{" "}
-                                  {format(
-                                    parseISO(leg.plannedArrival),
-                                    "HH:mm",
-                                  )}{" "}
-                                </span>
-                                {leg.arrivalDelay || leg.departureDelay ? (
-                                  <span className="font-semibold text-red-500">
-                                    ({format(parseISO(leg.departure), "HH:mm")}{" "}
-                                    - {format(parseISO(leg.arrival), "HH:mm")})
-                                  </span>
-                                ) : null}
-                              </div>
+                                {/* Content */}
+                                <div className="my-2">
+                                  <div>
+                                    <p className="text-lg font-semibold text-gray-800">
+                                      {leg.origin.name}
+                                    </p>
+                                    <span className="font-semibold">
+                                      {format(
+                                        parseISO(leg.plannedDeparture),
+                                        "HH:mm",
+                                      )}{" "}
+                                      -{" "}
+                                      {format(
+                                        parseISO(leg.plannedArrival),
+                                        "HH:mm",
+                                      )}{" "}
+                                    </span>
 
-                              <div className="flex items-center font-semibold ">
-                                {leg?.line && (
+                                    {leg.arrivalDelay || leg.departureDelay ? (
+                                      <span className="font-semibold text-red-500">
+                                        (
+                                        {format(
+                                          parseISO(leg.departure),
+                                          "HH:mm",
+                                        )}{" "}
+                                        -{" "}
+                                        {format(parseISO(leg.arrival), "HH:mm")}
+                                        )
+                                      </span>
+                                    ) : null}
+                                  </div>
+
+                                  <div className="flex items-center font-semibold ">
+                                    {leg?.line && (
+                                      <span className="my-1 flex">
+                                        <TrainFrontIcon className="mr-1 h-4 w-4" />
+                                        <span className="text-xs">
+                                          {leg?.line?.name}
+                                        </span>
+                                      </span>
+                                    )}
+                                  </div>
                                   <span className="my-1 flex">
-                                    <TrainFrontIcon className="mr-1 h-4 w-4" />
+                                    <ClockIcon className="mr-1 h-4 w-4" />
                                     <span className="text-xs">
-                                      {leg?.line?.name}
+                                      {formatTripDuration(
+                                        leg.departure,
+                                        leg.arrival,
+                                      )}
                                     </span>
                                   </span>
-                                )}
-                              </div>
-                              <span className="my-1 flex">
-                                <ClockIcon className="mr-1 h-4 w-4" />
-                                <span className="text-xs">
-                                  {formatTripDuration(
-                                    leg.departure,
-                                    leg.arrival,
-                                  )}
-                                </span>
-                              </span>
-                              <div className="mt-2">
-                                {!leg?.line && leg.walking && (
-                                  <div className="flex items-center text-center">
-                                    <PersonStanding className="h-6 w-6" />
+                                  <div className="mt-2">
+                                    {!leg?.line && leg.walking && (
+                                      <div className="flex items-center text-center">
+                                        <PersonStanding className="h-6 w-6" />
+                                      </div>
+                                    )}
+                                    {index === journey?.legs?.length - 1 && (
+                                      <p className="text-lg font-semibold text-gray-800">
+                                        {leg.destination.name}
+                                      </p>
+                                    )}
                                   </div>
-                                )}
-                                {index === journey?.legs?.length - 1 && (
-                                  <p className="text-lg font-semibold text-gray-800">
-                                    {leg.destination.name}
-                                  </p>
-                                )}
+                                </div>
                               </div>
+                            </div>
+                            <div className="col-span-2 pb-4 pt-1">
+                              {delay?.avgDelay ? (
+                                <>
+                                  <p className="text-lg font-bold text-slate-600">
+                                    Trip Performance
+                                  </p>
+                                  <p className="text-md flex flex-wrap gap-1 font-semibold">
+                                    <Badge variant={"outline"}>
+                                      {delay?.numOfTrips} Trips Recorded for{" "}
+                                      {leg.line.name} Trains or Equivalent
+                                    </Badge>
+                                    <Badge variant={"destructive"}>
+                                      {formatDuration(delay?.avgDelay)} Average
+                                      Delay Recorded
+                                    </Badge>
+                                  </p>
+                                  <p className="mb-2 mt-4 text-sm font-bold text-slate-400">
+                                    Additional Info
+                                  </p>
+                                  <p className="flex flex-wrap gap-1">
+                                    <Badge
+                                      variant={"outline"}
+                                      className="bg-green-400"
+                                    >
+                                      {delay.trainType}
+                                    </Badge>
+                                    <Badge variant={"destructive"}>
+                                      {formatDuration(delay.maxDelay!)} Worst
+                                      Recorded Delay
+                                    </Badge>
+                                    <Badge>
+                                      {delay.numOfCancellations} Cancellations
+                                      Recorded
+                                    </Badge>
+                                  </p>
+                                </>
+                              ) : (
+                                !leg.walking && (
+                                  <p>
+                                    There was no delay data found for this leg.
+                                  </p>
+                                )
+                              )}
                             </div>
                           </div>
                           {waitTime && (
@@ -252,8 +323,6 @@ export default function JourneyList() {
         </Accordion>
         <Button onClick={() => reset()}>Reset</Button>
       </CardContent>
-
-      {/* <div className="">{journey?.journeys && JSON.stringify(journey)}</div> */}
     </Card>
   );
 }
