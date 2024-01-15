@@ -14,7 +14,7 @@ export default async function Home() {
         </h1>
         <div className="flex flex-1 w-full gap-2">
           <TripSelection />
-          <Stats />
+          {/* <Stats /> */}
         </div>
         <JourneyList />
       </div>
