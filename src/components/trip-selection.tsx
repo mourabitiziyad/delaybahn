@@ -110,16 +110,20 @@ export default function TripSelection() {
   useEffect(() => {
     if (departureQuery) {
       console.log("departureQuery", departureQuery);
-      queryDepartures({ query: departureQuery });
-      setShowDepartureResults(true);
+      if (departureQuery !== from.name) {
+        queryDepartures({ query: departureQuery });
+        setShowDepartureResults(true);
+      }
     }
   }, [debouncedDeparture]);
 
   useEffect(() => {
     if (arrivalQuery) {
       console.log("arrivalQuery", arrivalQuery);
-      queryArrivals({ query: arrivalQuery });
-      setShowArrivalResults(true);
+      if (arrivalQuery !== to.name) {
+        queryArrivals({ query: arrivalQuery });
+        setShowArrivalResults(true);
+      }
     }
   }, [debouncedArrival]);
 
@@ -141,8 +145,12 @@ export default function TripSelection() {
             id="from"
             value={departureQuery}
             onChange={handleDepartureChange}
-            onClick={() =>
-              DepartureQueryResults && setShowDepartureResults(true)
+            onClick={() => {
+              if (from) {
+                setDeparture("");
+              }
+              DepartureQueryResults && setShowDepartureResults(true);
+            }
             }
             placeholder="Enter departure location"
           />
@@ -155,6 +163,7 @@ export default function TripSelection() {
             searchResults={DepartureQueryResults}
             onResultSelect={(result: Stop) => {
               setFrom(result);
+              setDeparture(result.name);
               setShowDepartureResults(false);
             }}
           />
@@ -170,7 +179,12 @@ export default function TripSelection() {
             id="to"
             value={arrivalQuery}
             onChange={handleArrivalChange}
-            onClick={() => ArrivalQueryResults && setShowArrivalResults(true)}
+            onClick={() => {
+              if (to) {
+                setArrival("");
+              }
+              ArrivalQueryResults && setShowArrivalResults(true)
+            }}
             placeholder="Enter destination location"
           />
           <SearchDropdown
@@ -182,6 +196,7 @@ export default function TripSelection() {
             searchResults={ArrivalQueryResults}
             onResultSelect={(result: Stop) => {
               setTo(result);
+              setArrival(result.name);
               setShowArrivalResults(false);
             }}
           />
@@ -231,6 +246,7 @@ export default function TripSelection() {
       </CardContent>
       <CardFooter>
         <Button
+        disabled={isJourneyLoading || from.id === to.id || !from.id || !to.id}
           onClick={() =>
             searchJourneys({
               from: from.id,
