@@ -18,7 +18,7 @@ import {
 import { Calendar } from "@/components/ui/calendar";
 import { JSX, SVGProps, useEffect, useState } from "react";
 import { Switch } from "./ui/switch";
-import { useJourneyStore, useStore } from "~/store/useStore";
+import { useDelayStore, useJourneyStore, useStore } from "~/store/useStore";
 import { format } from "date-fns";
 import { api } from "~/trpc/react";
 import useDebounce from "~/hooks/useDebounce";
@@ -50,7 +50,20 @@ export default function TripSelection() {
   } = useStore();
 
   const {journey, reset, setJourney} = useJourneyStore();
+  const {delays, setDelays} = useDelayStore();
 
+  const {
+    mutate: getJourneyDelays,
+    isLoading: isDelayLoading,
+    isError: isDelayError,
+    error: delayError,
+  } = api.delayStorage.getJourneyDelayPerTrip.useMutation({
+    onSuccess: (data) => {
+      console.log("delay data", data);
+      console.log("delays", delays);
+      setDelays(data);
+    },
+  });
   const {
     mutate: searchJourneys,
     isLoading: isJourneyLoading,
@@ -60,8 +73,15 @@ export default function TripSelection() {
     onSuccess: (data: JourneyResponse) => {
       reset();
       setJourney(data);
-    }
-  });
+      data?.journeys.forEach((journey) => {
+        journey.legs.forEach((leg) => {
+          let origin = leg.origin.id;
+          let destination = leg.destination.id;
+          let trainType = leg.line.product
+          getJourneyDelays({ origin, destination, trainType });
+        });
+      });
+    }});
 
   const {
     data: DepartureQueryResults,
