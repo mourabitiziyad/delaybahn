@@ -137,7 +137,7 @@ export const delayExtractionRouter = createTRPCRouter({
       await db.$executeRawUnsafe(sql);
 
       return { success: true, message: "JourneyDelays updated successfully" };
-    } catch (error) {
+    } catch (error: any) {
       console.error("An error occurred:", error);
       return new TRPCError({
         code: "INTERNAL_SERVER_ERROR",
