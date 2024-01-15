@@ -70,6 +70,7 @@ interface Remark {
 
 export interface Journey {
     walking?: boolean;
+    transfer?: boolean;
     origin: {
         type: string;
         id: string;
