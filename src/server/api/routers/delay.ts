@@ -15,8 +15,6 @@ export const delayExtractionRouter = createTRPCRouter({
     let tripsAddedCount = 0;
     const stops = await db.station.findMany();
     console.log(stops.length + " stops found");
-    // loop over stops and extract arrivals
-    // const departuresList: { id: string; depId: string | undefined; depName: string | undefined; depDate: string | undefined; arrId: string | undefined; arrName: string | undefined; trainId: string | undefined; trainName: string | undefined; cancelled: boolean | undefined; }[] = [];
     const departuresList: {
       id: string;
       depId: string;
@@ -33,6 +31,7 @@ export const delayExtractionRouter = createTRPCRouter({
     }[] = [];
 
     try {
+
       const departurePromises = stops.map(async (stop) => {
         const { departures } = await client.departures(stop.id, {
           linesOfStops: false,
@@ -50,8 +49,8 @@ export const delayExtractionRouter = createTRPCRouter({
             taxi: false,
           },
           when: undefined, // corresponds to Date.now()
-          duration: 61, // show departures for the next n mins
-          results: 1000, // show departures for the next n mins
+          duration: 61,
+          results: 1000,
         });
 
         // store trip ids in departures in arrays
@@ -84,6 +83,7 @@ export const delayExtractionRouter = createTRPCRouter({
       });
 
       await Promise.all(departurePromises);
+
       if (departuresList.length === 0) {
         console.log("No departures found");
       } else {
