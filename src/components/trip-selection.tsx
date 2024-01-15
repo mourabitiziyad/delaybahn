@@ -75,9 +75,9 @@ export default function TripSelection() {
       setJourney(data);
       data?.journeys.forEach((journey) => {
         journey.legs.forEach((leg) => {
-          let origin = leg.origin.id;
-          let destination = leg.destination.id;
-          let trainType = leg.line.product
+          const origin = leg.origin.id;
+          const destination = leg.destination.id;
+          const trainType = leg.line.product
           getJourneyDelays({ origin, destination, trainType });
         });
       });
