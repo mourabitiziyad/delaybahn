@@ -103,9 +103,19 @@ export const journeyRouter = createTRPCRouter({
       console.log(input);
       try {
         const res = await fetch(
-          `https://v6.db.transport.rest/journeys?from=${input.from}&to=${input.to}&departure=${input.now ? "now" : input.date.toISOString()}&results=10&language=en`,
+          `https://v6.db.transport.rest/journeys?from=${input.from}&to=${input.to}&departure=${input.now ? "now" : input.date.toISOString()}&results=20&language=en`,
         );
         const data = await res.json();
+        if (data.laterRef) {
+          const nextPage = await fetch(
+            `https://v6.db.transport.rest/journeys?from=${input.from}&to=${input.to}&laterRef=${data.laterRef}&language=en`,
+          );
+          const nextPageData = await nextPage.json();
+          if (nextPageData) {
+            data.journeys.push(...nextPageData.journeys);
+            return data;
+          }
+        }
         return data;
       } catch (error) {
         throw new TRPCError({
