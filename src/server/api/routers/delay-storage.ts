@@ -108,59 +108,35 @@ export const delayExtractionRouter = createTRPCRouter({
   }),
   addOrUpdateJourneyDelays: publicProcedure.query(async () => {
     try {
-      const aggregatedData = await db.trip.groupBy({
-        by: ['depId', 'depName', 'arrId', 'arrName', 'trainType'],
-        _avg: {
-          depDelay: true,
-        },
-        _min: {
-          depDelay: true,
-        },
-        _max: {
-          depDelay: true,
-        },
-        _count: {
-          depDelay: true,
-          cancelled: true,
-        }
-      });
-      console.log(aggregatedData.length + " aggregated data found");
+      // Construct your SQL query here
+      const sql = `
+          INSERT INTO JourneyDelays (id, depId, depName, arrId, arrName, trainType, avgDelay, minDelay, maxDelay, numOfTrips, numOfCancellations)
+          SELECT
+            UUID(), 
+            t.depId, 
+            t.depName, 
+            t.arrId, 
+            t.arrName, 
+            t.trainType, 
+            AVG(t.depDelay) AS avgDelay, 
+            MIN(t.depDelay) AS minDelay, 
+            MAX(t.depDelay) AS maxDelay, 
+            COUNT(*) AS numOfTrips, 
+            SUM(CASE WHEN t.cancelled = TRUE THEN 1 ELSE 0 END) AS numOfCancellations
+          FROM Trip t
+          GROUP BY t.depId, t.depName, t.arrId, t.arrName, t.trainType
+          ON DUPLICATE KEY UPDATE 
+            avgDelay = VALUES(avgDelay), 
+            minDelay = VALUES(minDelay), 
+            maxDelay = VALUES(maxDelay), 
+            numOfTrips = VALUES(numOfTrips), 
+            numOfCancellations = VALUES(numOfCancellations);
+        `;
 
-      for (const data of aggregatedData) {
-        await db.journeyDelays.upsert({
-          where: {
-            // Unique constraint
-            depId_arrId_trainType: {
-              depId: data.depId,
-              arrId: data.arrId,
-              trainType: data.trainType,
-            },
-          },
-          update: {
-            avgDelay: data._avg.depDelay,
-            minDelay: data._min.depDelay,
-            maxDelay: data._max.depDelay,
-            numOfTrips: data._count.depDelay,
-            numOfCancellations: data._count.cancelled,
-            // Other fields can be updated similarly
-          },
-          create: {
-            depId: data.depId,
-            depName: data.depName,
-            arrId: data.arrId,
-            arrName: data.arrName,
-            trainType: data.trainType,
-            avgDelay: data._avg.depDelay,
-            minDelay: data._min.depDelay,
-            maxDelay: data._max.depDelay,
-            numOfTrips: data._count.depDelay,
-            numOfCancellations: data._count.cancelled,
-  
-            // Other fields can be set similarly
-          },
-        });
-      }
-      return { success: true, message: "Found " + aggregatedData.length + " aggregated data"  };
+      // Execute the raw query
+      await db.$executeRawUnsafe(sql);
+
+      return { success: true, message: "JourneyDelays updated successfully" };
     } catch (error) {
       console.error("An error occurred:", error);
       return new TRPCError({
@@ -169,4 +145,4 @@ export const delayExtractionRouter = createTRPCRouter({
       });
     }
   }),
-})
+});
