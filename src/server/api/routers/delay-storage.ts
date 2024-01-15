@@ -24,7 +24,7 @@ export const delayExtractionRouter = createTRPCRouter({
       arrId: string;
       arrName: string | undefined;
       trainId: string;
-      trainType: string | undefined;
+      trainType: string;
       trainName: string | undefined;
       cancelled: boolean;
       remarks: string;
@@ -70,7 +70,7 @@ export const delayExtractionRouter = createTRPCRouter({
                 arrId: departure.destination?.id,
                 arrName: departure.destination?.name,
                 trainId: departure.line?.id,
-                trainType: departure.line?.product,
+                trainType: departure.line.product || "-",
                 trainName: departure.line?.name,
                 remarks: JSON.stringify(departure.remarks || null),
                 cancelled: departure.cancelled || false,
@@ -96,35 +96,73 @@ export const delayExtractionRouter = createTRPCRouter({
         );
       }
       console.log("Done");
-
-      const uniqueDepartures = departuresList.filter(
-        (departure, index, self) =>
-          index ===
-          self.findIndex(
-            (t) =>
-              t.id === departure.id &&
-              t.depId === departure.depId &&
-              t.depName === departure.depName &&
-              t.depDate === departure.depDate &&
-              t.arrId === departure.arrId &&
-              t.arrName === departure.arrName &&
-              t.depDelay === departure.depDelay &&
-              t.trainId === departure.trainId &&
-              t.trainName === departure.trainName &&
-              t.cancelled === departure.cancelled,
-          ),
-      );
-      console.log(
-        "unique departures in manual filter: " + uniqueDepartures.length,
-      );
-      console.log(
-        "duplicate departures in manual filter: " +
-          (departuresList.length - uniqueDepartures.length),
-      );
       console.log("total departures: " + departuresList.length);
       return { success: true, message: `${tripsAddedCount} Added to Database` };
     } catch (error: any) {
       console.error(error);
+      return new TRPCError({
+        code: "INTERNAL_SERVER_ERROR",
+        message: "Something went wrong: " + error?.message,
+      });
+    }
+  }),
+  addOrUpdateJourneyDelays: publicProcedure.query(async () => {
+    try {
+      const aggregatedData = await db.trip.groupBy({
+        by: ['depId', 'depName', 'arrId', 'arrName', 'trainType'],
+        _avg: {
+          depDelay: true,
+        },
+        _min: {
+          depDelay: true,
+        },
+        _max: {
+          depDelay: true,
+        },
+        _count: {
+          depDelay: true,
+          cancelled: true,
+        }
+      });
+      console.log(aggregatedData.length + " aggregated data found");
+
+      for (const data of aggregatedData) {
+        await db.journeyDelays.upsert({
+          where: {
+            // Unique constraint
+            depId_arrId_trainType: {
+              depId: data.depId,
+              arrId: data.arrId,
+              trainType: data.trainType,
+            },
+          },
+          update: {
+            avgDelay: data._avg.depDelay,
+            minDelay: data._min.depDelay,
+            maxDelay: data._max.depDelay,
+            numOfTrips: data._count.depDelay,
+            numOfCancellations: data._count.cancelled,
+            // Other fields can be updated similarly
+          },
+          create: {
+            depId: data.depId,
+            depName: data.depName,
+            arrId: data.arrId,
+            arrName: data.arrName,
+            trainType: data.trainType,
+            avgDelay: data._avg.depDelay,
+            minDelay: data._min.depDelay,
+            maxDelay: data._max.depDelay,
+            numOfTrips: data._count.depDelay,
+            numOfCancellations: data._count.cancelled,
+  
+            // Other fields can be set similarly
+          },
+        });
+      }
+      return { success: true, message: "Found " + aggregatedData.length + " aggregated data"  };
+    } catch (error) {
+      console.error("An error occurred:", error);
       return new TRPCError({
         code: "INTERNAL_SERVER_ERROR",
         message: "Something went wrong: " + error?.message,

@@ -74,7 +74,7 @@ model Trip {
   arrId     String
   arrName   String?
   trainId   String
-  trainType String?
+  trainType String
   trainName String?
   remarks   Json?
   cancelled Boolean  @default(false)
@@ -85,9 +85,82 @@ model Trip {
   @@index([depId, arrId, depDate])
 }
 
+model JourneyDelays {
+  id                 String   @id @default(cuid())
+  depId              String
+  depName            String?
+  avgDelay           Int?
+  minDelay           Int?
+  maxDelay           Int?
+  numOfTrips         Int?
+  numOfCancellations Int?
+  arrId              String
+  arrName            String?
+  trainType          String
+  createdAt          DateTime @default(now()) @db.DateTime(0)
+  updatedAt          DateTime @default(now()) @updatedAt @db.DateTime(0)
+
+  @@unique([depId, arrId, trainType], map: "depId")
+  @@index([depId, arrId], map: "idx_depId_arrId")
+}
+
 model Station {
   id        String   @id @unique @default(cuid())
   name      String
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
+}
+
+model b13af7_ca4e_58e8_8e62_4079fec4ecb9_20240114230423_vrepl {
+  id        String
+  depId     String
+  depName   String?
+  depDelay  Int?
+  depDate   DateTime
+  arrId     String
+  arrName   String?
+  trainId   String
+  trainType String?
+  trainName String?
+  remarks   Json?
+  cancelled Boolean  @default(false)
+  createdAt DateTime @default(now())
+  updatedAt DateTime
+
+  @@unique([depId, arrId, trainId, depDate], map: "Trip_depId_arrId_trainId_depDate_key")
+  @@index([depId, arrId, depDate], map: "Trip_depId_arrId_depDate_idx")
+  @@map("_37b13af7_ca4e_58e8_8e62_4079fec4ecb9_20240114230423_vrepl")
+}
+
+model vt_HOLD_a4600df9bc675299b37a6572cb107e22_20240115230549 {
+  id                  String    @id @db.VarChar(36)
+  checksum            String    @db.VarChar(64)
+  finished_at         DateTime?
+  migration_name      String    @db.VarChar(255)
+  logs                String?   @db.Text
+  rolled_back_at      DateTime?
+  started_at          DateTime  @default(now())
+  applied_steps_count Int       @default(0) @db.UnsignedInt
+
+  @@map("_vt_HOLD_a4600df9bc675299b37a6572cb107e22_20240115230549")
+}
+
+model vt_HOLD_dc478aa7b32711eeb0952e77153fb108_20240115215707 {
+  id          String
+  depId       String
+  depName     String?
+  avgDelay    Int?
+  minDelay    Int?
+  maxDelay    Int?
+  stdDevDelay Int?
+  numOfTrips  Int?
+  arrId       String
+  arrName     String?
+  trainType   String
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime
+
+  @@unique([depId, arrId, trainType], map: "JourneyDelays_depId_arrId_trainType_key")
+  @@index([depId, arrId], map: "JourneyDelays_depId_arrId_idx")
+  @@map("_vt_HOLD_dc478aa7b32711eeb0952e77153fb108_20240115215707")
 }
