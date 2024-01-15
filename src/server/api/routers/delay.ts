@@ -1,9 +1,11 @@
+import { Journey } from './../../../types/types';
 import { createTRPCRouter, publicProcedure } from "../trpc";
 import { TRPCError } from "@trpc/server";
 import { db } from "~/server/db";
 
 import { createClient } from "hafas-client";
 import { profile as dbProfile } from "hafas-client/p/db/index.js";
+import { z } from "zod";
 
 const userAgent = "station-extraction";
 const client = createClient(dbProfile, userAgent);
@@ -145,4 +147,33 @@ export const delayExtractionRouter = createTRPCRouter({
       });
     }
   }),
+  getJourneyDelayPerTrip: publicProcedure
+    .input(
+      z.object({
+        origin: z.string(),
+        destination: z.string(),
+        trainType: z.string(),
+      }),
+    )
+    .mutation(async ({input}) => {
+      return await db.journeyDelays.findMany({
+        where: {
+          depId: input.origin,
+          arrId: input.destination,
+          trainType: input.trainType,
+        }, select: {
+          id: false,
+          depId: true,
+          depName: true,
+          arrId: true,
+          arrName: true,
+          trainType: true,
+          avgDelay: true,
+          minDelay: true,
+          maxDelay: true,
+          numOfTrips: true,
+          numOfCancellations: true,
+        }
+      });
+    }),
 });
