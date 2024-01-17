@@ -9,11 +9,6 @@ const config = {
     images: {
         domains: ["lh3.googleusercontent.com"],
     },
-    // set serverless functions timeout to 1 minute
-    // https://vercel.com/docs/platform/limits#serverless-function-timeout
-    serverRuntimeConfig:{
-        setTimeout: 60
-    }
 };
 
 export default config;
