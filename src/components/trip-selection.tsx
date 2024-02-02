@@ -247,7 +247,7 @@ export default function TripSelection() {
             <SearchDropdown
               showResults={showDepartureResults}
               setSearchVisibility={setShowDepartureResults}
-              errorMessage={departureQueryError?.message}
+              errorMessage={JSON.stringify(departureQueryError)}
               isError={isDepartureQueryError}
               isLoading={isDepartureQueryLoading}
               searchResults={DepartureQueryResults as Stop[]}
@@ -282,7 +282,7 @@ export default function TripSelection() {
             <SearchDropdown
               showResults={showArrivalResults}
               setSearchVisibility={setShowArrivalResults}
-              errorMessage={arrivalQueryError?.message}
+              errorMessage={JSON.stringify(arrivalQueryError)}
               isError={isArrivalQueryError}
               isLoading={isArrivalQueryLoading}
               searchResults={ArrivalQueryResults as Stop[]}
