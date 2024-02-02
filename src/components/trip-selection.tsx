@@ -25,6 +25,17 @@ import useDebounce from "~/hooks/useDebounce";
 import { SearchDropdown } from "./ui/search-dropdown";
 import { JourneyResponse, Stop } from "~/types/types";
 import { Spinner } from "./ui/spinner";
+import { Separator } from "./ui/separator";
+import Image from "next/image";
+import { ScrollArea } from "./ui/scroll-area";
+import { Checkbox } from "./ui/checkbox";
+import { RadioGroup, RadioGroupItem } from "./ui/radio-group";
+import {
+  OptionIcon,
+  Settings2Icon,
+  SettingsIcon,
+  TrainFrontIcon,
+} from "lucide-react";
 
 export default function TripSelection() {
   const [departureQuery, setDeparture] = useState("");
@@ -36,12 +47,16 @@ export default function TripSelection() {
   const [showDepartureResults, setShowDepartureResults] = useState(false);
   const [showArrivalResults, setShowArrivalResults] = useState(false);
 
+  const [transportOption, setTransportOption] = useState("all");
+
   const {
     from,
     to,
     date,
     time,
     now,
+    transportTypes,
+    setTransportTypes,
     setFrom,
     setTo,
     setDate,
@@ -49,8 +64,8 @@ export default function TripSelection() {
     setNow,
   } = useStore();
 
-  const {journey, reset, setJourney} = useJourneyStore();
-  const {delays, setDelays} = useDelayStore();
+  const { journey, reset, setJourney } = useJourneyStore();
+  const { delays, setDelays } = useDelayStore();
 
   const {
     mutate: getJourneyDelays,
@@ -77,11 +92,12 @@ export default function TripSelection() {
         journey.legs.forEach((leg) => {
           const origin = leg.origin.id;
           const destination = leg.destination.id;
-          const trainType = leg.line.product
+          const trainType = leg.line.product;
           getJourneyDelays({ origin, destination, trainType });
         });
       });
-    }});
+    },
+  });
 
   const {
     data: DepartureQueryResults,
@@ -127,11 +143,70 @@ export default function TripSelection() {
     }
   }, [debouncedArrival]);
 
+  const [radioSelection, setRadioSelection] = useState("all"); // State to track radio selection
+
+  // Update radio selection based on transportTypes
+  useEffect(() => {
+    // Determine the radio selection based on transportTypes state
+    const isLocal =
+      transportTypes.regional &&
+      transportTypes.suburban &&
+      transportTypes.bus &&
+      transportTypes.ferry &&
+      transportTypes.subway &&
+      transportTypes.tram &&
+      transportTypes.taxi &&
+      !transportTypes.nationalExpress &&
+      !transportTypes.national &&
+      !transportTypes.regionalExpress;
+    const isLongDistance =
+      transportTypes.nationalExpress &&
+      transportTypes.national &&
+      transportTypes.regionalExpress &&
+      !transportTypes.regional &&
+      !transportTypes.suburban &&
+      !transportTypes.bus &&
+      !transportTypes.ferry &&
+      !transportTypes.subway &&
+      !transportTypes.tram &&
+      !transportTypes.taxi;
+    const isAll =
+      transportTypes.nationalExpress &&
+      transportTypes.national &&
+      transportTypes.regionalExpress &&
+      transportTypes.regional &&
+      transportTypes.suburban &&
+      transportTypes.bus &&
+      transportTypes.ferry &&
+      transportTypes.subway &&
+      transportTypes.tram &&
+      transportTypes.taxi;
+
+    if (isLocal) {
+      setRadioSelection("local");
+    } else if (isLongDistance) {
+      setRadioSelection("long");
+    } else if (isAll) {
+      setRadioSelection("all"); // Default or mixed selection
+    } else {
+      setRadioSelection(""); // Default or mixed selection
+    }
+  }, [transportTypes]); // Depend on transportTypes state
+
+  const handleSwitchChange = (key: keyof typeof transportTypes) => {
+    // Update the specific transportType based on its current state
+    const updatedTransportTypes = {
+      ...transportTypes,
+      [key]: !transportTypes[key],
+    };
+    setTransportTypes(updatedTransportTypes);
+  };
+
   const combineDateTime = (selectedDate: Date, selectedTime: string): Date => {
-    const timeParts = selectedTime.split(':').map(Number);
+    const timeParts = selectedTime.split(":").map(Number);
     const hours = timeParts[0] ?? 0; // Default to 0 if undefined
     const minutes = timeParts[1] ?? 0; // Default to 0 if undefined
-  
+
     selectedDate.setHours(hours, minutes);
     return selectedDate;
   };
@@ -139,7 +214,9 @@ export default function TripSelection() {
   const handleDateSelect = (selectedDate: Date | undefined) => {
     if (!selectedDate) return; // Early return if no date is selected
 
-    const newDate = time ? combineDateTime(new Date(selectedDate), time) : new Date(selectedDate);
+    const newDate = time
+      ? combineDateTime(new Date(selectedDate), time)
+      : new Date(selectedDate);
     setDate(newDate);
   };
 
@@ -176,8 +253,7 @@ export default function TripSelection() {
                 setDeparture("");
               }
               DepartureQueryResults && setShowDepartureResults(true);
-            }
-            }
+            }}
             placeholder="Enter departure location"
           />
           <SearchDropdown
@@ -209,7 +285,7 @@ export default function TripSelection() {
               if (to) {
                 setArrival("");
               }
-              ArrivalQueryResults && setShowArrivalResults(true)
+              ArrivalQueryResults && setShowArrivalResults(true);
             }}
             placeholder="Enter destination location"
           />
@@ -227,53 +303,219 @@ export default function TripSelection() {
             }}
           />
         </div>
-        <div className="grid grid-cols-2 gap-4">
-          <div className="space-y-2">
+        <div className="grid grid-cols-12 gap-1">
+          <div className="col-span-3 space-y-2 p-2">
+            <Label className="block" htmlFor="transport-mode">
+              Transport Mode
+            </Label>
+            <Popover>
+              <PopoverTrigger asChild>
+                <Button
+                  className="w-full justify-start text-left font-normal"
+                  variant="outline"
+                >
+                  <Settings2Icon className="mr-1 h-4 w-4 -translate-x-1" />
+                  Options
+                </Button>
+              </PopoverTrigger>
+              <PopoverContent align="start" className="w-80 p-2">
+                <RadioGroup
+                  id="transport-mode"
+                  value={radioSelection}
+                  defaultValue={transportOption}
+                  onValueChange={(value: string) => {
+                    setTransportOption(value); // Update local state for conditional rendering
+                    switch (value) {
+                      case "local":
+                        // Enable all except nationalExpress, national, and regionalExpress
+                        setTransportTypes({
+                          nationalExpress: false,
+                          national: false,
+                          regionalExpress: false,
+                          regional: true,
+                          suburban: true,
+                          bus: true,
+                          ferry: true,
+                          subway: true,
+                          tram: true,
+                          taxi: true,
+                        });
+                        break;
+                      case "long":
+                        // Enable only nationalExpress, national, and regionalExpress
+                        setTransportTypes({
+                          nationalExpress: true,
+                          national: true,
+                          regionalExpress: true,
+                          regional: false,
+                          suburban: false,
+                          bus: false,
+                          ferry: false,
+                          subway: false,
+                          tram: false,
+                          taxi: false,
+                        });
+                        break;
+                      case "all":
+                        // Enable all
+                        setTransportTypes({
+                          nationalExpress: true,
+                          national: true,
+                          regionalExpress: true,
+                          regional: true,
+                          suburban: true,
+                          bus: true,
+                          ferry: true,
+                          subway: true,
+                          tram: true,
+                          taxi: true,
+                        });
+                        break;
+                      default:
+                        break;
+                    }
+                  }}
+                >
+                  <Label className="inline-flex w-full gap-2 p-1">
+                    <RadioGroupItem value="local" id="r1" />
+                    Local/regional transport only
+                  </Label>
+                  <Label className="inline-flex w-full gap-2 p-1">
+                    <RadioGroupItem value="long" id="r2" />
+                    Long-distance travel only
+                  </Label>
+                  <Label className="inline-flex w-full gap-2 p-1">
+                    <RadioGroupItem value="all" id="r2" />
+                    All
+                  </Label>
+                </RadioGroup>
+
+                <div className="p-2">
+                  <Separator />
+                </div>
+
+                <ScrollArea className="h-60">
+                  {[
+                    {
+                      imageSrc: "/highspeed.png",
+                      label: "InterCityExpress (ICE)",
+                      key: "nationalExpress",
+                    },
+                    {
+                      imageSrc: "/intercity.png",
+                      label: "InterCity & EuroCity (IC/EC)",
+                      key: "national",
+                    },
+                    {
+                      imageSrc: "/interregio.png",
+                      label: "InterRegio & Fast Trains (RE/IR)",
+                      key: "regionalExpress",
+                    },
+                    {
+                      imageSrc: "/regional.png",
+                      label: "Regional & Other Trains",
+                      key: "regional",
+                    },
+                    {
+                      imageSrc: "/sbahn.png",
+                      label: "Suburban",
+                      key: "suburban",
+                    },
+                    { imageSrc: "/bus.png", label: "Bus", key: "bus" },
+                    { imageSrc: "/ferry.png", label: "Ferry", key: "ferry" },
+                    {
+                      imageSrc: "/ubahn.png",
+                      label: "Underground",
+                      key: "subway",
+                    },
+                    { imageSrc: "/tram.png", label: "Tram", key: "tram" },
+                    {
+                      imageSrc: "/taxi.png",
+                      label: "Services requiring tel. registration",
+                      key: "taxi",
+                    },
+                  ].map((item, index) => (
+                    <div key={index}>
+                      <div className="flex justify-between gap-2 p-2">
+                        <div>
+                          <div className="space-x-2">
+                            <Image
+                              className="inline-flex h-6 w-6 rounded-sm"
+                              width={100}
+                              height={100}
+                              src={item.imageSrc}
+                              alt=""
+                            />
+                            <Label>{item.label}</Label>
+                          </div>
+                        </div>
+                        <Switch
+                          id={item.key}
+                          checked={transportTypes[item.key]}
+                          onCheckedChange={() =>
+                            handleSwitchChange(
+                              item.key as keyof typeof transportTypes,
+                            )
+                          }
+                        />
+                      </div>
+                    </div>
+                  ))}
+                </ScrollArea>
+              </PopoverContent>
+            </Popover>
+          </div>
+          <div className="col-span-5 space-y-1">
             <Label
               className={now ? "text-muted-foreground" : ""}
               htmlFor="departure-date"
             >
               Departure Date
             </Label>
-            <Popover>
-      <PopoverTrigger disabled={now} asChild>
-        <Button className="w-full justify-start text-left font-normal" variant="outline">
-          <CalendarDaysIcon className="mr-1 h-4 w-4 -translate-x-1" />
-          {date ? format(date, "PPPp") : <span>Select Date</span>}
-        </Button>
-      </PopoverTrigger>
-      <PopoverContent align="start" className="w-auto p-0">
-        <Calendar
-          id="departure-date"
-          mode="single"
-          selected={date}
-          onSelect={handleDateSelect}
-          initialFocus
-        />
-        <input
-          type="time"
-          className="w-full p-2 border-t border-gray-200"
-          value={time}
-          onChange={handleTimeChange}
-        />
-      </PopoverContent>
-    </Popover>
-          </div>
-          <div className="space-y-2">
-            <Label htmlFor="now-date">Now: </Label>
-            <div className="flex w-auto items-center">
-              <Switch
-                id="now-date"
-                checked={now}
-                onCheckedChange={() => setNow(!now)}
-              />
+            <div className="flex">
+              <Popover>
+                <PopoverTrigger disabled={now} asChild>
+                  <Button
+                    className="w-full mt-0.5 justify-start text-left font-normal"
+                    variant="outline"
+                  >
+                    <CalendarDaysIcon className="mr-1 h-4 w-4 -translate-x-1" />
+                    {date ? format(date, "PPPp") : <span>Select Date</span>}
+                  </Button>
+                </PopoverTrigger>
+                <PopoverContent align="start" className="w-auto p-0">
+                  <Calendar
+                    id="departure-date"
+                    mode="single"
+                    selected={date}
+                    onSelect={handleDateSelect}
+                    initialFocus
+                  />
+                  <input
+                    type="time"
+                    className="w-full border-t border-gray-200 p-2"
+                    value={time}
+                    onChange={handleTimeChange}
+                  />
+                </PopoverContent>
+              </Popover>
+              <div>
+                <div className="flex gap-2 items-center mt-1.5 ml-2">
+                <Label htmlFor="now-date">Now </Label>
+                  <Switch
+                    id="now-date"
+                    checked={now}
+                    onCheckedChange={() => setNow(!now)}
+                  />
+                </div>
+              </div>
             </div>
           </div>
         </div>
       </CardContent>
       <CardFooter>
         <Button
-        disabled={isJourneyLoading || from.id === to.id || !from.id || !to.id}
+          disabled={isJourneyLoading || from.id === to.id || !from.id || !to.id}
           onClick={() =>
             searchJourneys({
               from: from.id,

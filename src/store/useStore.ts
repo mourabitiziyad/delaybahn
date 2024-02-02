@@ -7,12 +7,36 @@ export interface StoreType {
     date: Date;
     now: boolean;
     time: string;
+    transportTypes: {
+        nationalExpress: boolean;
+        national: boolean;
+        regionalExpress: boolean;
+        regional: boolean;
+        suburban: boolean;
+        bus: boolean;
+        ferry: boolean;
+        subway: boolean;
+        tram: boolean;
+        taxi: boolean;
+    }
 
     setFrom: (from: Stop) => void;
     setTo: (to: Stop) => void;
     setDate: (date: Date) => void;
     setNow: (now: boolean) => void;
     setTime: (time: string) => void;
+    setTransportTypes: (transportTypes: {
+        nationalExpress: boolean;
+        national: boolean;
+        regionalExpress: boolean;
+        regional: boolean;
+        suburban: boolean;
+        bus: boolean;
+        ferry: boolean;
+        subway: boolean;
+        tram: boolean;
+        taxi: boolean;
+    }) => void;
     reset: () => void;
 }
 
@@ -22,7 +46,19 @@ export const useStore = create<StoreType>((set) => ({
     date: new Date(),
     now: true,
     time: "",
-
+    transportTypes: {
+        nationalExpress: true,
+        national: true,
+        regionalExpress: true,
+        regional: true,
+        suburban: true,
+        bus: true,
+        ferry: true,
+        subway: true,
+        tram: true,
+        taxi: true,
+    },
+    setTransportTypes: (transportTypes) => set(() => ({ transportTypes })),
     setFrom: (from) => set(() => ({ from })),
     setTo: (to) => set(() => ({ to })),
     setDate: (date) => set(() => ({ date })),
