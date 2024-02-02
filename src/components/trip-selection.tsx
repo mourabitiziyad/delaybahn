@@ -60,13 +60,11 @@ export default function TripSelection() {
   } = useStore();
 
   const { reset, setJourney } = useJourneyStore();
-  const { delays, setDelays } = useDelayStore();
+  const { setDelays } = useDelayStore();
 
   const { mutate: getJourneyDelays } =
     api.delayStorage.getJourneyDelayPerTrip.useMutation({
       onSuccess: (data) => {
-        console.log("delay data", data);
-        console.log("delays", delays);
         setDelays(data);
       },
     });
@@ -112,7 +110,6 @@ export default function TripSelection() {
 
   useEffect(() => {
     if (departureQuery) {
-      console.log("departureQuery", departureQuery);
       if (departureQuery !== from.name) {
         queryDepartures({ query: departureQuery });
         setShowDepartureResults(true);
@@ -122,7 +119,6 @@ export default function TripSelection() {
 
   useEffect(() => {
     if (arrivalQuery) {
-      console.log("arrivalQuery", arrivalQuery);
       if (arrivalQuery !== to.name) {
         queryArrivals({ query: arrivalQuery });
         setShowArrivalResults(true);

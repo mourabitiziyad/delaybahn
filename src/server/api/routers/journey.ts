@@ -25,7 +25,6 @@ export const journeyRouter = createTRPCRouter({
   searchJourney: publicProcedure
     .input(z.object({ from: z.string(), to: z.string(), date: z.date(), now: z.boolean(), transportTypes: transportTypes}))
     .mutation(async ({ input }) => {
-      console.log(input);
       try {
         const data = await client.journeys(input.from, input.to, {
           departure: input.now ? new Date() : input.date,
