@@ -127,6 +127,32 @@ export default function TripSelection() {
     }
   }, [debouncedArrival]);
 
+  const combineDateTime = (selectedDate: Date, selectedTime: string): Date => {
+    const timeParts = selectedTime.split(':').map(Number);
+    const hours = timeParts[0] ?? 0; // Default to 0 if undefined
+    const minutes = timeParts[1] ?? 0; // Default to 0 if undefined
+  
+    selectedDate.setHours(hours, minutes);
+    return selectedDate;
+  };
+
+  const handleDateSelect = (selectedDate: Date | undefined) => {
+    if (!selectedDate) return; // Early return if no date is selected
+
+    const newDate = time ? combineDateTime(new Date(selectedDate), time) : new Date(selectedDate);
+    setDate(newDate);
+  };
+
+  const handleTimeChange = (event: React.ChangeEvent<HTMLInputElement>) => {
+    const newTime = event.target.value;
+    setTime(newTime);
+
+    if (date) {
+      const updatedDate = combineDateTime(new Date(date), newTime);
+      setDate(updatedDate);
+    }
+  };
+
   return (
     <Card className="mx-auto w-full max-w-2xl">
       <CardHeader>
@@ -210,27 +236,28 @@ export default function TripSelection() {
               Departure Date
             </Label>
             <Popover>
-              <PopoverTrigger disabled={now} asChild>
-                <Button
-                  className="w-full justify-start text-left font-normal"
-                  variant="outline"
-                >
-                  <CalendarDaysIcon className="mr-1 h-4 w-4 -translate-x-1" />
-                  {date ? format(date, "PPP") : <span>Select Date</span>}
-                </Button>
-              </PopoverTrigger>
-              <PopoverContent align="start" className="w-auto p-0">
-                <Calendar
-                  id="departure-date"
-                  mode="single"
-                  selected={date}
-                  onSelect={(date: Date | undefined) =>
-                    setDate(date ?? new Date())
-                  }
-                  initialFocus
-                />
-              </PopoverContent>
-            </Popover>
+      <PopoverTrigger disabled={now} asChild>
+        <Button className="w-full justify-start text-left font-normal" variant="outline">
+          <CalendarDaysIcon className="mr-1 h-4 w-4 -translate-x-1" />
+          {date ? format(date, "PPPp") : <span>Select Date</span>}
+        </Button>
+      </PopoverTrigger>
+      <PopoverContent align="start" className="w-auto p-0">
+        <Calendar
+          id="departure-date"
+          mode="single"
+          selected={date}
+          onSelect={handleDateSelect}
+          initialFocus
+        />
+        <input
+          type="time"
+          className="w-full p-2 border-t border-gray-200"
+          value={time}
+          onChange={handleTimeChange}
+        />
+      </PopoverContent>
+    </Popover>
           </div>
           <div className="space-y-2">
             <Label htmlFor="now-date">Now: </Label>
