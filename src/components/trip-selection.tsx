@@ -465,7 +465,7 @@ export default function TripSelection() {
               </PopoverContent>
             </Popover>
           </div>
-          <div className="col-span-5 space-y-1">
+          <div className="col-span-8 space-y-1">
             <Label
               className={now ? "text-muted-foreground" : ""}
               htmlFor="departure-date"
@@ -522,6 +522,7 @@ export default function TripSelection() {
               to: to.id,
               date: date,
               now: now,
+              transportTypes: transportTypes,
             })
           }
           className="w-full"
