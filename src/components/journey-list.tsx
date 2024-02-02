@@ -290,7 +290,7 @@ export default function JourneyList() {
                                     </Badge>
                                     <Badge variant={"destructive"}>
                                       {formatPeriod(delay?.avgDelay)} is the
-                                      average Delay Recorded
+                                      average delay recorded
                                     </Badge>
                                   </p>
                                   <p className="mb-2 mt-4 text-sm font-bold text-slate-400">
@@ -305,7 +305,7 @@ export default function JourneyList() {
                                     </Badge>
                                     <Badge variant={"destructive"}>
                                       {formatPeriod(delay.maxDelay!)} was the
-                                      worst Recorded Delay
+                                      worst recorded delay
                                     </Badge>
                                     <Badge>
                                       {delay.numOfCancellations} Cancellations
