@@ -2,14 +2,13 @@ import { z } from "zod";
 import { createTRPCRouter, publicProcedure } from "../trpc";
 import { TRPCError } from "@trpc/server";
 
-const locationSchema = z.object({
-  type: z.string().optional(),
-  id: z.string().optional(),
-  latitude: z.number(),
-  longitude: z.number(),
-});
+import { createClient } from "hafas-client";
+import { profile as dbProfile } from "hafas-client/p/db/index.js";
 
-const productsSchema = z.object({
+const userAgent = "station-extraction";
+const client = createClient(dbProfile, userAgent);
+
+const transportTypes = z.object({
   nationalExpress: z.boolean(),
   national: z.boolean(),
   regionalExpress: z.boolean(),
@@ -20,103 +19,32 @@ const productsSchema = z.object({
   subway: z.boolean(),
   tram: z.boolean(),
   taxi: z.boolean(),
-});
-
-const operatorSchema = z.object({
-  type: z.string().optional(),
-  id: z.string().optional(),
-  name: z.string().optional(),
-});
-
-const lineSchema = z.object({
-  type: z.string().optional(),
-  id: z.string().optional(),
-  fahrtNr: z.string().optional(),
-  name: z.string().optional(),
-  public: z.boolean(),
-  adminCode: z.string().optional(),
-  productName: z.string().optional(),
-  mode: z.string().optional(),
-  product: z.string().optional(),
-  operator: operatorSchema,
-});
-
-const remarkSchema = z.object({
-  text: z.string().optional(),
-  type: z.string().optional(),
-  code: z.string().optional(),
-  summary: z.string().optional(),
-});
-
-const journeySchema = z.object({
-  origin: z.object({
-    type: z.string().optional(),
-    id: z.string().optional(),
-    name: z.string().optional(),
-    location: locationSchema,
-    products: productsSchema,
-  }).optional(),
-  destination: z.object({
-    type: z.string().optional(),
-    id: z.string().optional(),
-    name: z.string().optional(),
-    location: locationSchema,
-    products: productsSchema,
-  }).optional(),
-  departure: z.string().optional(),
-  plannedDeparture: z.string().optional(),
-  departureDelay: z.number().optional(),
-  arrival: z.string().optional(),
-  plannedArrival: z.string().optional(),
-  arrivalDelay: z.number().optional(),
-  reachable: z.boolean().optional(),
-  tripId: z.string().optional(),
-  line: lineSchema.optional(),
-  direction: z.string().optional(),
-  currentLocation: locationSchema.optional(),
-  arrivalPlatform: z.string().optional(),
-  plannedArrivalPlatform: z.string().optional(),
-  arrivalPrognosisType: z.string().optional(),
-  departurePlatform: z.string().optional(),
-  plannedDeparturePlatform: z.string().optional(),
-  departurePrognosisType: z.string().optional(),
-  remarks: z.array(remarkSchema).optional(),
-  loadFactor: z.string().optional(),
-});
-
-const JourneyResponseSchema = z.object({
-  journeys: z.array(journeySchema),
-  refreshToken: z.string().optional(),
-  price: z.object({
-    amount: z.number(),
-    currency: z.string().optional(),
-    hint: z.string().nullable(),
-  }).optional(),
-});
-
-
+})
 
 export const journeyRouter = createTRPCRouter({
   searchJourney: publicProcedure
-    .input(z.object({ from: z.string().optional(), to: z.string().optional(), date: z.date(), now: z.boolean() }))
+    .input(z.object({ from: z.string(), to: z.string(), date: z.date(), now: z.boolean(), transportTypes: transportTypes}))
     .mutation(async ({ input }) => {
       console.log(input);
       try {
-        const res = await fetch(
-          `https://v6.db.transport.rest/journeys?from=${input.from}&to=${input.to}&departure=${input.now ? "now" : input.date.toISOString()}&results=20&language=en`,
-        );
-        const data = await res.json();
-        // if (data.laterRef) {
-        //   const nextPage = await fetch(
-        //     `https://v6.db.transport.rest/journeys?from=${input.from}&to=${input.to}&laterRef=${data.laterRef}&language=en`,
-        //   );
-        //   const nextPageData = await nextPage.json();
-        //   if (nextPageData?.journeys && data?.journeys) {
-        //     data.journeys.push(...nextPageData.journeys);
-        //     return data;
-        //   }
-        // }
-        return data;
+        const journeys = await client.journeys(input.from, input.to, {
+          departure: input.now ? new Date() : input.date,
+          results: 20,
+          language: "en",
+          products: {
+            nationalExpress: input.transportTypes.nationalExpress,
+            national: input.transportTypes.national,
+            regionalExpress: input.transportTypes.regionalExpress,
+            regional: input.transportTypes.regional,
+            suburban: input.transportTypes.suburban,
+            bus: input.transportTypes.bus,
+            ferry: input.transportTypes.ferry,
+            subway: input.transportTypes.subway,
+            tram: input.transportTypes.tram,
+            taxi: input.transportTypes.taxi,
+          },
+        })
+        return journeys;
       } catch (error) {
         throw new TRPCError({
           code: "INTERNAL_SERVER_ERROR",
