@@ -21,6 +21,13 @@ export const tripRouter = createTRPCRouter({
             language: "en",
             results: 20,
         });
+        if (!locations || locations.length === 0) {
+          throw new TRPCError({
+            code: "NOT_FOUND",
+            message: "No locations found",
+            cause: new Error("No locations found"),
+          });
+        }
         return locations;
       } catch (error) {
         throw new TRPCError({

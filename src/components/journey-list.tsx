@@ -15,8 +15,8 @@ import { ArrowRightIcon, ClockIcon } from "@radix-ui/react-icons";
 import { format, parseISO, differenceInMinutes } from "date-fns";
 import { PersonStanding, TrainFrontIcon } from "lucide-react";
 import { cn } from "~/lib/utils";
-import { Journey } from "~/types/types";
 import { Badge } from "./ui/badge";
+import { Leg } from "hafas-client";
 
 export default function JourneyList() {
   const { journey, reset } = useJourneyStore();
@@ -50,28 +50,29 @@ export default function JourneyList() {
     const secondsInADay = 86400;
     const secondsInAnHour = 3600;
     const secondsInAMinute = 60;
-  
+
     const days = Math.floor(totalSeconds / secondsInADay);
     totalSeconds %= secondsInADay; // Remaining seconds after calculating days
     const hours = Math.floor(totalSeconds / secondsInAnHour);
     totalSeconds %= secondsInAnHour; // Remaining seconds after calculating hours
     const minutes = Math.floor(totalSeconds / secondsInAMinute);
     const seconds = totalSeconds % secondsInAMinute; // Remaining seconds
-  
+
     let result = "";
     if (days > 0) {
-      result += `${days} day${days > 1 ? 's' : ''} `;
+      result += `${days} day${days > 1 ? "s" : ""} `;
     }
     if (hours > 0) {
-      result += `${hours} hour${hours > 1 ? 's' : ''} `;
+      result += `${hours} hour${hours > 1 ? "s" : ""} `;
     }
     if (minutes > 0) {
-      result += `${minutes} minute${minutes > 1 ? 's' : ''} `;
+      result += `${minutes} minute${minutes > 1 ? "s" : ""} `;
     }
-    if (seconds > 0 || result === "") { // Include seconds if it's the only unit or add to existing units
-      result += `${seconds} second${seconds !== 1 ? 's' : ''}`;
+    if (seconds > 0 || result === "") {
+      // Include seconds if it's the only unit or add to existing units
+      result += `${seconds} second${seconds !== 1 ? "s" : ""}`;
     }
-  
+
     return result.trim(); // Trim any extra whitespace from the ends
   }
 
@@ -90,8 +91,8 @@ export default function JourneyList() {
     return differenceInMinutes(endDate, startDate);
   };
 
-  const calculateLegRatio = (leg: Journey, totalDuration: number) => {
-    const legDuration = calculateDurationInMinutes(leg.departure, leg.arrival);
+  const calculateLegRatio = (leg: Leg, totalDuration: number) => {
+    const legDuration = calculateDurationInMinutes(leg.departure!, leg.arrival!);
     // Convert toFixed result back to a number
     return Math.floor(Number((legDuration / totalDuration).toFixed(4)) * 100);
   };
@@ -112,22 +113,24 @@ export default function JourneyList() {
             if (!journey.legs || journey.legs.length === 0) {
               return null;
             }
-            const firstLeg = journey.legs[0]!;
-            const lastLeg = journey.legs[journey.legs.length - 1]!;
+            const firstLeg = journey.legs[0];
+            const lastLeg = journey.legs[journey.legs.length - 1];
             const journeyDuration = formatTripDuration(
-              firstLeg.departure,
-              lastLeg.arrival,
+              firstLeg?.departure ?? "",
+              lastLeg?.arrival ?? "",
             );
             const totalDuration = calculateDurationInMinutes(
-              firstLeg.departure,
-              lastLeg.arrival,
+              firstLeg?.departure ?? "",
+              lastLeg?.arrival ?? "",
             );
             return (
               <AccordionItem className="" value={index.toString()} key={index}>
                 <AccordionTrigger className="mb-4 flex w-full justify-between rounded-lg bg-slate-100 p-2">
                   <div className="w-full">
                     <div className="text-left">
-                      <div className="flex justify-between">
+                      {
+                        firstLeg?.departure && lastLeg?.arrival &&
+                        <div className="flex justify-between">
                         <span className="text-sm font-medium text-muted-foreground">
                           {format(parseISO(firstLeg.departure), "HH:mm")} -{" "}
                           {format(parseISO(lastLeg.arrival), "HH:mm")} |{" "}
@@ -137,19 +140,12 @@ export default function JourneyList() {
                         <span className="mr-4 text-sm font-medium text-muted-foreground">
                           {format(parseISO(firstLeg.departure), "EEEE MMM do")}
                         </span>
-                      </div>
+                      </div>}
                       <div className="flex w-full">
                         {journey?.legs?.map((leg, index) => {
                           const legRatio = calculateLegRatio(
                             leg,
                             totalDuration,
-                          );
-                          // TODO
-                          const delay = delays?.find(
-                            (delay) =>
-                              delay.depId === leg.origin.id &&
-                              delay.arrId === leg.destination.id &&
-                              delay.trainType === leg.line?.product,
                           );
                           return (
                             <div
@@ -168,7 +164,8 @@ export default function JourneyList() {
                                 </div>
                               ) : (
                                 <p className="m-auto mx-1 text-xs font-bold">
-                                  {leg.line?.name} {leg?.transfer && "— Transfer"}
+                                  {leg.line?.name}{" "}
+                                  {leg?.transfer && "— Transfer"}
                                 </p>
                               )}
                             </div>
@@ -176,8 +173,7 @@ export default function JourneyList() {
                         })}
                       </div>
                       <div>
-                        <span className="font-semiBold text-xs text-muted-foreground">
-                        </span>
+                        <span className="font-semiBold text-xs text-muted-foreground"></span>
                       </div>
                     </div>
                   </div>
@@ -190,13 +186,13 @@ export default function JourneyList() {
                     {journey?.legs?.map((leg, index) => {
                       const nextLeg = journey?.legs[index + 1];
                       const waitTime = calculateWaitTime(
-                        leg.arrival,
+                        leg.arrival!,
                         nextLeg?.departure ?? "",
                       );
                       const delay = delays?.find(
                         (delay) =>
-                          delay.depId === leg.origin.id &&
-                          delay.arrId === leg.destination.id &&
+                          delay.depId === leg.origin?.id &&
+                          delay.arrId === leg.destination?.id &&
                           delay.trainType === leg.line?.product,
                       );
                       return (
@@ -219,16 +215,16 @@ export default function JourneyList() {
                                 <div className="my-2">
                                   <div>
                                     <p className="text-lg font-semibold text-gray-800">
-                                      {leg.origin.name}
+                                      {leg.origin?.name ?? ''}
                                     </p>
                                     <span className="font-semibold">
                                       {format(
-                                        parseISO(leg.plannedDeparture),
+                                        parseISO(leg.plannedDeparture ?? ''),
                                         "HH:mm",
                                       )}{" "}
                                       -{" "}
                                       {format(
-                                        parseISO(leg.plannedArrival),
+                                        parseISO(leg.plannedArrival ?? ''),
                                         "HH:mm",
                                       )}{" "}
                                     </span>
@@ -237,11 +233,11 @@ export default function JourneyList() {
                                       <span className="font-semibold text-red-500">
                                         (
                                         {format(
-                                          parseISO(leg.departure),
+                                          parseISO(leg.departure ?? ''),
                                           "HH:mm",
                                         )}{" "}
                                         -{" "}
-                                        {format(parseISO(leg.arrival), "HH:mm")}
+                                        {format(parseISO(leg.arrival ?? ''), "HH:mm")}
                                         )
                                       </span>
                                     ) : null}
@@ -261,8 +257,8 @@ export default function JourneyList() {
                                     <ClockIcon className="mr-1 h-4 w-4" />
                                     <span className="text-xs">
                                       {formatTripDuration(
-                                        leg.departure,
-                                        leg.arrival,
+                                        leg.departure ?? "",
+                                        leg.arrival ?? "",
                                       )}
                                     </span>
                                   </span>
@@ -274,7 +270,7 @@ export default function JourneyList() {
                                     )}
                                     {index === journey?.legs?.length - 1 && (
                                       <p className="text-lg font-semibold text-gray-800">
-                                        {leg.destination.name}
+                                        {leg.destination?.name}
                                       </p>
                                     )}
                                   </div>
@@ -290,11 +286,11 @@ export default function JourneyList() {
                                   <p className="text-md flex flex-wrap gap-1 font-semibold">
                                     <Badge variant={"outline"}>
                                       {delay?.numOfTrips} Trips Recorded for{" "}
-                                      {leg.line.name} Trains or Equivalent
+                                      {leg.line?.name ?? ''} Trains or Equivalent
                                     </Badge>
                                     <Badge variant={"destructive"}>
-                                      {formatPeriod(delay?.avgDelay)} is the average
-                                      Delay Recorded
+                                      {formatPeriod(delay?.avgDelay)} is the
+                                      average Delay Recorded
                                     </Badge>
                                   </p>
                                   <p className="mb-2 mt-4 text-sm font-bold text-slate-400">
@@ -308,8 +304,8 @@ export default function JourneyList() {
                                       {delay.trainType}
                                     </Badge>
                                     <Badge variant={"destructive"}>
-                                      {formatPeriod(delay.maxDelay!)} was the worst
-                                      Recorded Delay
+                                      {formatPeriod(delay.maxDelay!)} was the
+                                      worst Recorded Delay
                                     </Badge>
                                     <Badge>
                                       {delay.numOfCancellations} Cancellations

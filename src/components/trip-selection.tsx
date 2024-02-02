@@ -23,19 +23,14 @@ import { format } from "date-fns";
 import { api } from "~/trpc/react";
 import useDebounce from "~/hooks/useDebounce";
 import { SearchDropdown } from "./ui/search-dropdown";
-import { JourneyResponse, Stop } from "~/types/types";
+import { Stop } from "~/types/types";
 import { Spinner } from "./ui/spinner";
 import { Separator } from "./ui/separator";
 import Image from "next/image";
 import { ScrollArea } from "./ui/scroll-area";
-import { Checkbox } from "./ui/checkbox";
 import { RadioGroup, RadioGroupItem } from "./ui/radio-group";
-import {
-  OptionIcon,
-  Settings2Icon,
-  SettingsIcon,
-  TrainFrontIcon,
-} from "lucide-react";
+import { Settings2Icon } from "lucide-react";
+import { Journeys } from "hafas-client";
 
 export default function TripSelection() {
   const [departureQuery, setDeparture] = useState("");
@@ -64,40 +59,32 @@ export default function TripSelection() {
     setNow,
   } = useStore();
 
-  const { journey, reset, setJourney } = useJourneyStore();
+  const { reset, setJourney } = useJourneyStore();
   const { delays, setDelays } = useDelayStore();
 
-  const {
-    mutate: getJourneyDelays,
-    isLoading: isDelayLoading,
-    isError: isDelayError,
-    error: delayError,
-  } = api.delayStorage.getJourneyDelayPerTrip.useMutation({
-    onSuccess: (data) => {
-      console.log("delay data", data);
-      console.log("delays", delays);
-      setDelays(data);
-    },
-  });
-  const {
-    mutate: searchJourneys,
-    isLoading: isJourneyLoading,
-    isError: isDepartureError,
-    error: JourneyError,
-  } = api.journey.searchJourney.useMutation({
-    onSuccess: (data: JourneyResponse) => {
-      reset();
-      setJourney(data);
-      data?.journeys.forEach((journey) => {
-        journey.legs.forEach((leg) => {
-          const origin = leg.origin.id;
-          const destination = leg.destination.id;
-          const trainType = leg.line.product;
-          getJourneyDelays({ origin, destination, trainType });
+  const { mutate: getJourneyDelays } =
+    api.delayStorage.getJourneyDelayPerTrip.useMutation({
+      onSuccess: (data) => {
+        console.log("delay data", data);
+        console.log("delays", delays);
+        setDelays(data);
+      },
+    });
+  const { mutate: searchJourneys, isLoading: isJourneyLoading } =
+    api.journey.searchJourney.useMutation({
+      onSuccess: (data: Journeys) => {
+        reset();
+        setJourney(data);
+        data.journeys?.forEach((journey) => {
+          journey.legs.forEach((leg) => {
+            const origin = leg.origin?.id ?? "";
+            const destination = leg.destination?.id ?? "";
+            const trainType = leg.line?.product ?? "";
+            getJourneyDelays({ origin, destination, trainType });
+          });
         });
-      });
-    },
-  });
+      },
+    });
 
   const {
     data: DepartureQueryResults,
@@ -256,19 +243,21 @@ export default function TripSelection() {
             }}
             placeholder="Enter departure location"
           />
-          <SearchDropdown
-            showResults={showDepartureResults}
-            setSearchVisibility={setShowDepartureResults}
-            errorMessage={departureQueryError?.message}
-            isError={isDepartureQueryError}
-            isLoading={isDepartureQueryLoading}
-            searchResults={DepartureQueryResults}
-            onResultSelect={(result: Stop) => {
-              setFrom(result);
-              setDeparture(result.name);
-              setShowDepartureResults(false);
-            }}
-          />
+          {DepartureQueryResults && (
+            <SearchDropdown
+              showResults={showDepartureResults}
+              setSearchVisibility={setShowDepartureResults}
+              errorMessage={departureQueryError?.message}
+              isError={isDepartureQueryError}
+              isLoading={isDepartureQueryLoading}
+              searchResults={DepartureQueryResults as Stop[]}
+              onResultSelect={(result: Stop) => {
+                setFrom(result);
+                setDeparture(result.name);
+                setShowDepartureResults(false);
+              }}
+            />
+          )}
         </div>
         <div className="space-y-2">
           <Label className="flex justify-start" htmlFor="to">
@@ -289,19 +278,21 @@ export default function TripSelection() {
             }}
             placeholder="Enter destination location"
           />
-          <SearchDropdown
-            showResults={showArrivalResults}
-            setSearchVisibility={setShowArrivalResults}
-            errorMessage={arrivalQueryError?.message}
-            isError={isArrivalQueryError}
-            isLoading={isArrivalQueryLoading}
-            searchResults={ArrivalQueryResults}
-            onResultSelect={(result: Stop) => {
-              setTo(result);
-              setArrival(result.name);
-              setShowArrivalResults(false);
-            }}
-          />
+          {ArrivalQueryResults && (
+            <SearchDropdown
+              showResults={showArrivalResults}
+              setSearchVisibility={setShowArrivalResults}
+              errorMessage={arrivalQueryError?.message}
+              isError={isArrivalQueryError}
+              isLoading={isArrivalQueryLoading}
+              searchResults={ArrivalQueryResults as Stop[]}
+              onResultSelect={(result: Stop) => {
+                setTo(result);
+                setArrival(result.name);
+                setShowArrivalResults(false);
+              }}
+            />
+          )}
         </div>
         <div className="grid grid-cols-12 gap-1">
           <div className="col-span-3 space-y-2 p-2">
@@ -451,7 +442,11 @@ export default function TripSelection() {
                         </div>
                         <Switch
                           id={item.key}
-                          checked={transportTypes[item.key]}
+                          checked={
+                            transportTypes[
+                              item.key as keyof typeof transportTypes
+                            ]
+                          }
                           onCheckedChange={() =>
                             handleSwitchChange(
                               item.key as keyof typeof transportTypes,
@@ -476,7 +471,7 @@ export default function TripSelection() {
               <Popover>
                 <PopoverTrigger disabled={now} asChild>
                   <Button
-                    className="w-full mt-0.5 justify-start text-left font-normal"
+                    className="mt-0.5 w-full justify-start text-left font-normal"
                     variant="outline"
                   >
                     <CalendarDaysIcon className="mr-1 h-4 w-4 -translate-x-1" />
@@ -500,8 +495,8 @@ export default function TripSelection() {
                 </PopoverContent>
               </Popover>
               <div>
-                <div className="flex gap-2 items-center mt-1.5 ml-2">
-                <Label htmlFor="now-date">Now </Label>
+                <div className="ml-2 mt-1.5 flex items-center gap-2">
+                  <Label htmlFor="now-date">Now </Label>
                   <Switch
                     id="now-date"
                     checked={now}

@@ -1,5 +1,6 @@
+import { Journeys } from "hafas-client";
 import { create } from "zustand";
-import { JourneyResponse, Stop } from "~/types/types";
+import { Stop } from "~/types/types";
 
 export interface StoreType {
     from: Stop;
@@ -75,14 +76,14 @@ export const useStore = create<StoreType>((set) => ({
 }));
 
 export interface JourneyStoreType {
-    journey: JourneyResponse | undefined;
-    setJourney: (journey: JourneyResponse) => void;
+    journey: Journeys;
+    setJourney: (journey: Journeys) => void;
     reset: () => void;
 }
 
 export const useJourneyStore = create<JourneyStoreType>((set) => ({
-    journey: Object(),
-    setJourney: (journey: JourneyResponse) => set(() => ({ journey })),
+    journey: [],
+    setJourney: (journey: Journeys) => set(() => ({ journey })),
     reset: () => set(() => ({ journey: undefined })),
 }));
 

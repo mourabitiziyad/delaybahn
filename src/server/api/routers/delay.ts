@@ -1,4 +1,3 @@
-import { Journey } from './../../../types/types';
 import { createTRPCRouter, publicProcedure } from "../trpc";
 import { TRPCError } from "@trpc/server";
 import { db } from "~/server/db";

@@ -13,17 +13,15 @@ export const SearchDropdown = ({
   errorMessage,
   searchResults,
   onResultSelect,
-}:
-  Readonly<{
-    showResults: boolean;
-    setSearchVisibility: (value: boolean) => void;
-    isLoading: boolean;
-    isError: boolean;
-    errorMessage: string | undefined;
-    searchResults: Stop[] | undefined;
-    onResultSelect: (result: Stop) => void;
-  }>
-) => {
+}: Readonly<{
+  showResults: boolean;
+  setSearchVisibility: (value: boolean) => void;
+  isLoading: boolean;
+  isError: boolean;
+  errorMessage: string | undefined;
+  searchResults: Stop[] | undefined;
+  onResultSelect: (result: Stop) => void;
+}>) => {
   // Hide results when clicked outside
   useEffect(() => {
     const handleClickOutside = (event: MouseEvent) => {
@@ -39,7 +37,7 @@ export const SearchDropdown = ({
   return (
     <div className="relative space-y-2">
       {showResults && (
-        <div className="search-dropdown absolute z-10 rounded-md pt-2 shadow-lg bg-white">
+        <div className="search-dropdown absolute z-10 rounded-md bg-white pt-2 shadow-lg">
           <ScrollArea className="h-32 min-w-full">
             {isError && <div>Error: {errorMessage}</div>}
             {isLoading && (
@@ -47,10 +45,12 @@ export const SearchDropdown = ({
                 {Array.from({ length: 6 }).map((_, index) => (
                   <Skeleton
                     key={index}
-                    className={cn(`w-48`, "relative block h-8 cursor-default select-none rounded-sm mx-2 my-1.5")}
+                    className={cn(
+                      `w-48`,
+                      "relative mx-2 my-1.5 block h-8 cursor-default select-none rounded-sm",
+                    )}
                   />
                 ))}
-
               </div>
             )}
             {searchResults && (
@@ -59,7 +59,7 @@ export const SearchDropdown = ({
                   <div
                     key={result.id}
                     onClick={() => onResultSelect(result)}
-                    className="relative pl-2 flex cursor-default select-none items-center rounded-sm px-2 py-1.5 text-sm outline-none aria-selected:bg-accent aria-selected:text-accent-foreground data-[disabled]:pointer-events-none data-[disabled]:opacity-50"
+                    className="relative flex cursor-default select-none items-center rounded-sm px-2 py-1.5 pl-2 text-sm outline-none aria-selected:bg-accent aria-selected:text-accent-foreground data-[disabled]:pointer-events-none data-[disabled]:opacity-50"
                   >
                     <button>{result.name}</button>
                   </div>

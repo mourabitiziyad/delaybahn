@@ -27,7 +27,7 @@ export const journeyRouter = createTRPCRouter({
     .mutation(async ({ input }) => {
       console.log(input);
       try {
-        const journeys = await client.journeys(input.from, input.to, {
+        const data = await client.journeys(input.from, input.to, {
           departure: input.now ? new Date() : input.date,
           results: 20,
           language: "en",
@@ -44,7 +44,7 @@ export const journeyRouter = createTRPCRouter({
             taxi: input.transportTypes.taxi,
           },
         })
-        return journeys;
+        return data;
       } catch (error) {
         throw new TRPCError({
           code: "INTERNAL_SERVER_ERROR",
