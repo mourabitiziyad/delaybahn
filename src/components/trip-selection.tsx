@@ -279,9 +279,9 @@ export default function TripSelection() {
             isError={isArrivalQueryError}
             isLoading={isArrivalQueryLoading}
             searchResults={ArrivalQueryResults as Stop[]}
-            onResultSelect={(result: Stop) => {
-              setTo(result);
-              setArrival(result.name);
+            onResultSelect={(result: Stop | Station) => {
+              setTo(result as Stop);
+              setArrival(result.name ?? "");
               setShowArrivalResults(false);
             }}
           />
