@@ -1,4 +1,4 @@
-import { createTRPCRouter, publicProcedure } from "../trpc";
+import { createTRPCRouter, protectedProcedure, publicProcedure } from "../trpc";
 import { TRPCError } from "@trpc/server";
 import { db } from "~/server/db";
 
@@ -175,4 +175,7 @@ export const delayExtractionRouter = createTRPCRouter({
         }
       });
     }),
+  getJourneyDelays: protectedProcedure.query(async () => {
+    return await db.journeyDelays.findMany();
+  }),
 });
