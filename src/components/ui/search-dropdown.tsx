@@ -4,6 +4,7 @@ import { ScrollArea } from "./scroll-area";
 import { cn } from "~/lib/utils";
 import { Skeleton } from "./skeleton";
 import { Stop } from "~/types/types";
+import { Station } from "hafas-client";
 
 export const SearchDropdown = ({
   showResults,
@@ -19,7 +20,7 @@ export const SearchDropdown = ({
   isLoading: boolean;
   isError: boolean;
   errorMessage: string | undefined;
-  searchResults: Stop[] | undefined;
+  searchResults: Stop[] | Station[] | undefined;
   onResultSelect: (result: Stop) => void;
 }>) => {
   // Hide results when clicked outside
