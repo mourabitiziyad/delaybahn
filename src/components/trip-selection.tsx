@@ -30,7 +30,7 @@ import Image from "next/image";
 import { ScrollArea } from "./ui/scroll-area";
 import { RadioGroup, RadioGroupItem } from "./ui/radio-group";
 import { Settings2Icon } from "lucide-react";
-import { Journeys } from "hafas-client";
+import { Journeys, Station } from "hafas-client";
 
 export default function TripSelection() {
   const [departureQuery, setDeparture] = useState("");
@@ -246,9 +246,9 @@ export default function TripSelection() {
             isError={isDepartureQueryError}
             isLoading={isDepartureQueryLoading}
             searchResults={DepartureQueryResults as Stop[]}
-            onResultSelect={(result: Stop) => {
-              setFrom(result);
-              setDeparture(result.name);
+            onResultSelect={(result: Stop | Station) => {
+              setFrom(result as Stop);
+              setDeparture(result.name ?? "");
               setShowDepartureResults(false);
             }}
           />
