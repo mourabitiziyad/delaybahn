@@ -21,7 +21,7 @@ export const SearchDropdown = ({
   isError: boolean;
   errorMessage: string | undefined;
   searchResults: Stop[] | Station[] | undefined;
-  onResultSelect: (result: Stop) => void;
+  onResultSelect: (result: Stop | Station) => void;
 }>) => {
   // Hide results when clicked outside
   useEffect(() => {
@@ -56,7 +56,7 @@ export const SearchDropdown = ({
             )}
             {searchResults && (
               <div>
-                {searchResults.map((result: Stop, index: number) => (
+                {searchResults.map((result: Stop | Station, index: number) => (
                   <div
                     key={result.id}
                     onClick={() => onResultSelect(result)}
