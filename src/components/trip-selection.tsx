@@ -239,21 +239,19 @@ export default function TripSelection() {
             }}
             placeholder="Enter departure location"
           />
-          {DepartureQueryResults && (
-            <SearchDropdown
-              showResults={showDepartureResults}
-              setSearchVisibility={setShowDepartureResults}
-              errorMessage={JSON.stringify(departureQueryError)}
-              isError={isDepartureQueryError}
-              isLoading={isDepartureQueryLoading}
-              searchResults={DepartureQueryResults as Stop[]}
-              onResultSelect={(result: Stop) => {
-                setFrom(result);
-                setDeparture(result.name);
-                setShowDepartureResults(false);
-              }}
-            />
-          )}
+          <SearchDropdown
+            showResults={showDepartureResults}
+            setSearchVisibility={setShowDepartureResults}
+            errorMessage={JSON.stringify(departureQueryError)}
+            isError={isDepartureQueryError}
+            isLoading={isDepartureQueryLoading}
+            searchResults={DepartureQueryResults as Stop[]}
+            onResultSelect={(result: Stop) => {
+              setFrom(result);
+              setDeparture(result.name);
+              setShowDepartureResults(false);
+            }}
+          />
         </div>
         <div className="space-y-2">
           <Label className="flex justify-start" htmlFor="to">
@@ -274,21 +272,19 @@ export default function TripSelection() {
             }}
             placeholder="Enter destination location"
           />
-          {ArrivalQueryResults && (
-            <SearchDropdown
-              showResults={showArrivalResults}
-              setSearchVisibility={setShowArrivalResults}
-              errorMessage={JSON.stringify(arrivalQueryError)}
-              isError={isArrivalQueryError}
-              isLoading={isArrivalQueryLoading}
-              searchResults={ArrivalQueryResults as Stop[]}
-              onResultSelect={(result: Stop) => {
-                setTo(result);
-                setArrival(result.name);
-                setShowArrivalResults(false);
-              }}
-            />
-          )}
+          <SearchDropdown
+            showResults={showArrivalResults}
+            setSearchVisibility={setShowArrivalResults}
+            errorMessage={JSON.stringify(arrivalQueryError)}
+            isError={isArrivalQueryError}
+            isLoading={isArrivalQueryLoading}
+            searchResults={ArrivalQueryResults as Stop[]}
+            onResultSelect={(result: Stop) => {
+              setTo(result);
+              setArrival(result.name);
+              setShowArrivalResults(false);
+            }}
+          />
         </div>
         <div className="grid grid-cols-12 gap-1">
           <div className="col-span-3 space-y-2 p-2">
