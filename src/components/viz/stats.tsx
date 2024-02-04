@@ -97,7 +97,7 @@ export default function Stats() {
     const selectedIndex = event.target.selectedIndex;
     const selectedOptionAttribute =
       event.target.options[selectedIndex]?.getAttribute("data-key") ?? "{}";
-    const selectedOption = JSON.parse(selectedOptionAttribute);
+    const selectedOption: { name: string; id: string } = JSON.parse(selectedOptionAttribute);
     setSelectedArrival(selectedOption);
   };
 
