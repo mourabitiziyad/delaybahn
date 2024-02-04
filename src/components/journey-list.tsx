@@ -14,7 +14,7 @@ import { AccordionTrigger } from "@radix-ui/react-accordion";
 import { ArrowRightIcon, ClockIcon } from "@radix-ui/react-icons";
 import { format, parseISO, differenceInMinutes } from "date-fns";
 import { PersonStanding, TrainFrontIcon } from "lucide-react";
-import { cn } from "~/lib/utils";
+import { cn, formatPeriod } from "~/lib/utils";
 import { Badge } from "./ui/badge";
 import { Leg } from "hafas-client";
 
@@ -44,36 +44,6 @@ export default function JourneyList() {
     const formattedSeconds = remainingSeconds.toString().padStart(2, "0");
 
     return `${formattedHours}:${formattedMinutes}:${formattedSeconds}`;
-  }
-
-  function formatPeriod(totalSeconds: number): string {
-    const secondsInADay = 86400;
-    const secondsInAnHour = 3600;
-    const secondsInAMinute = 60;
-
-    const days = Math.floor(totalSeconds / secondsInADay);
-    totalSeconds %= secondsInADay; // Remaining seconds after calculating days
-    const hours = Math.floor(totalSeconds / secondsInAnHour);
-    totalSeconds %= secondsInAnHour; // Remaining seconds after calculating hours
-    const minutes = Math.floor(totalSeconds / secondsInAMinute);
-    const seconds = totalSeconds % secondsInAMinute; // Remaining seconds
-
-    let result = "";
-    if (days > 0) {
-      result += `${days} day${days > 1 ? "s" : ""} `;
-    }
-    if (hours > 0) {
-      result += `${hours} hour${hours > 1 ? "s" : ""} `;
-    }
-    if (minutes > 0) {
-      result += `${minutes} minute${minutes > 1 ? "s" : ""} `;
-    }
-    if (seconds > 0 || result === "") {
-      // Include seconds if it's the only unit or add to existing units
-      result += `${seconds} second${seconds !== 1 ? "s" : ""}`;
-    }
-
-    return result.trim(); // Trim any extra whitespace from the ends
   }
 
   const formatTripDuration = (departure: string, arrival: string) => {

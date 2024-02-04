@@ -1,11 +1,7 @@
 import JourneyList from "~/components/journey-list";
-import Stats from "~/components/stats-data";
 import TripSelection from "~/components/trip-selection";
-import { getServerAuthSession } from "~/server/auth";
 
-export default async function Home() {
-  const session = await getServerAuthSession();
-
+export default function Home() {
   return (
     <main className="flex flex-col items-center justify-center">
       <div className="container flex flex-col items-center justify-center gap-12 px-4 py-16 ">
@@ -14,7 +10,6 @@ export default async function Home() {
         </h1>
         <div className="flex flex-1 w-full gap-2">
           <TripSelection />
-          {/* <Stats /> */}
         </div>
         <JourneyList />
       </div>
