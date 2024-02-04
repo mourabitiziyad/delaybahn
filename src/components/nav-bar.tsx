@@ -33,8 +33,15 @@ export async function NavBar() {
         <button>
           <Link
             tabIndex={0}
+            href={session ? "/stats" : "/"}
+            className="rounded-full border-2 bg-white/10 mx-4 px-10 py-2 font-semibold no-underline transition hover:bg-slate-50"
+          >
+            Stats
+          </Link>
+          <Link
+            tabIndex={0}
             href={session ? "/api/auth/signout" : "/api/auth/signin"}
-            className="rounded-full bg-white/10 mx-4 px-10 py-2 font-semibold no-underline transition hover:bg-slate-50"
+            className="rounded-full border-2 bg-white/10 mr-4 px-10 py-2 font-semibold no-underline transition hover:bg-slate-50"
           >
             {session ? "Sign out" : "Sign in"}
           </Link>
