@@ -42,8 +42,8 @@ export default function Stats() {
     );
 
     // Sorting the departures array by name in ascending order
-    departuresArray.sort((a, b) => a.name.localeCompare(b.name));
-
+    departuresArray.sort((a: { name: string }, b: { name: string }) => a.name.localeCompare(b.name));
+    
     return departuresArray;
   }, [trainData]);
 
@@ -62,7 +62,7 @@ export default function Stats() {
     );
 
     // Sorting the arrivals array by name in ascending order
-    arrivalsArray.sort((a, b) => a.name.localeCompare(b.name));
+    arrivalsArray.sort((a: { name: string }, b: { name: string }) => a.name.localeCompare(b.name));
 
     return arrivalsArray;
   }, [selectedDeparture, trainData]);
@@ -85,11 +85,10 @@ export default function Stats() {
   const handleDepartureChange = (
     event: React.ChangeEvent<HTMLSelectElement>,
   ) => {
-    // Use optional chaining with ?. and provide a default value with ?? in case anything is undefined
     const selectedIndex = event.target.selectedIndex;
     const selectedOptionAttribute =
       event.target.options[selectedIndex]?.getAttribute("data-key") ?? "{}";
-    const selectedOption = JSON.parse(selectedOptionAttribute);
+    const selectedOption: { name: string; id: string } = JSON.parse(selectedOptionAttribute);
     setSelectedDeparture(selectedOption);
     setSelectedArrival({ name: "", id: "" }); // Reset arrival on departure change
   };
@@ -148,8 +147,7 @@ export default function Stats() {
   const chartData =
     tripData &&
     tripData.map((journey) => ({
-      date: new Date(journey.depDate).toLocaleDateString(),
-      // time: new Date(journey.depDate).getTime(),
+      date: new Date(journey.depDate)?.toLocaleDateString(),
       delay: journey.depDelay,
       cancelled: journey.cancelled && -100,
     }));

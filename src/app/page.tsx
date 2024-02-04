@@ -1,8 +1,7 @@
 import JourneyList from "~/components/journey-list";
 import TripSelection from "~/components/trip-selection";
 
-export default async function Home() {
-
+export default function Home() {
   return (
     <main className="flex flex-col items-center justify-center">
       <div className="container flex flex-col items-center justify-center gap-12 px-4 py-16 ">
