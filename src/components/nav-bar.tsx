@@ -24,7 +24,7 @@ export async function NavBar() {
         </button>
       </div>
       <div className="flex-1">
-        <a className="btn btn-ghost text-xl">DelayBahn</a>
+        <Link href={"/"} className="btn btn-ghost text-xl">DelayBahn</Link>
       </div>
       <div className="flex-none">
         {session?.user.name && (

@@ -5,6 +5,7 @@ import { formatPeriod } from "~/lib/utils";
 import { api } from "~/trpc/react";
 import { LineChart } from "@tremor/react";
 import { Card, CardContent, CardTitle } from "~/components/ui/card";
+import { Spinner } from "../ui/spinner";
 import StatsBar from "./bar-list";
 
 export default function Stats() {
@@ -41,7 +42,7 @@ export default function Stats() {
     );
 
     // Sorting the departures array by name in ascending order
-    // departuresArray.sort((a, b) => a.name.localeCompare(b.name));
+    departuresArray.sort((a, b) => a.name.localeCompare(b.name));
 
     return departuresArray;
   }, [trainData]);
@@ -235,6 +236,7 @@ export default function Stats() {
           }
         >
           Display Delay Metrics
+          {isTripDelayLoading && <Spinner className="ml-2 text-white" />}
         </Button>
         <div className="w-full">
           <div className="my-2 grid grid-cols-4 gap-2">
@@ -271,7 +273,7 @@ export default function Stats() {
           </div>
           <Card className="w-full">
             <CardTitle className="p-4">
-              Trip Delay Progression with time
+              Trip Delay Progression with time (seconds)
             </CardTitle>
             <CardContent>
               <LineChart
@@ -292,14 +294,14 @@ export default function Stats() {
           <div className="grid grid-cols-2 gap-2">
             <Card className="mt-2 w-full">
               <StatsBar
-                data={selectedBarListData[0]}
+                data={selectedBarListData[0] ?? []}
                 Label="Number of Trips"
                 Color={null}
               />
             </Card>
             <Card className="mt-2 w-full">
               <StatsBar
-                data={selectedBarListData[1]}
+                data={selectedBarListData[1] ?? []}
                 Label="Average Delays"
                 Color="red"
               />
