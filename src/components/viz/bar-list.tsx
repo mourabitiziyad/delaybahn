@@ -1,20 +1,33 @@
 "use client";
-import { BarList, Bold, Card, Flex, Text, Title } from "@tremor/react";
+import { BarList, Bold, Flex, Text, Title } from "@tremor/react";
+import { ScrollArea } from "../ui/scroll-area";
 
-export default function StatsBar({ data }) {
-  // sort data by number of trips
+export default function StatsBar({
+  data,
+  Label,
+  Color,
+}: Readonly<{ data: any; Label: string; Color: string | null }>) {
   return (
-    <Card className="max-w-lg">
-      <Title>Website Analytics</Title>
+    <div className="p-4">
+      <Title>Arrival Insights</Title>
       <Flex className="mt-4">
         <Text>
           <Bold>Destinations</Bold>
         </Text>
         <Text>
-          <Bold>Number of Trips</Bold>
+          <Bold>{Label}</Bold>
         </Text>
       </Flex>
-      <BarList data={data.sort((a: { avgDelay: number; }, b: { avgDelay: number; }) => b.avgDelay - a.avgDelay)} className="mt-2" />
-    </Card>
+      {!data && (
+        <Flex justifyContent="center" className="h-12">
+          <Text>Choose a departure station!</Text>
+        </Flex>
+      )}
+      {data && (
+        <ScrollArea className="mt-2 h-60 w-full py-0 pr-3">
+          <BarList data={data} className="mt-2" color={Color} />
+        </ScrollArea>
+      )}
+    </div>
   );
 }
