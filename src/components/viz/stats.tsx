@@ -145,8 +145,7 @@ export default function Stats() {
   if (isError) return <div>Error: {error?.message}</div>;
 
   const chartData =
-    tripData &&
-    tripData.map((journey) => ({
+    tripData?.map((journey) => ({
       date: new Date(journey.depDate)?.toLocaleDateString(),
       delay: journey.depDelay,
       cancelled: journey.cancelled && -100,
