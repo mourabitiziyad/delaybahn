@@ -30,7 +30,6 @@ export const delayExtractionRouter = createTRPCRouter({
     }[] = [];
 
     try {
-
       const departurePromises = stops.map(async (stop) => {
         const { departures } = await client.departures(stop.id, {
           linesOfStops: false,
@@ -154,13 +153,14 @@ export const delayExtractionRouter = createTRPCRouter({
         trainType: z.string(),
       }),
     )
-    .mutation(async ({input}) => {
+    .mutation(async ({ input }) => {
       return await db.journeyDelays.findMany({
         where: {
           depId: input.origin,
           arrId: input.destination,
           trainType: input.trainType,
-        }, select: {
+        },
+        select: {
           id: false,
           depId: true,
           depName: true,
@@ -172,10 +172,30 @@ export const delayExtractionRouter = createTRPCRouter({
           maxDelay: true,
           numOfTrips: true,
           numOfCancellations: true,
-        }
+        },
       });
     }),
   getJourneyDelays: protectedProcedure.query(async () => {
     return await db.journeyDelays.findMany();
   }),
+  getAdvancedDelaysPerTrip: protectedProcedure
+    .input(
+      z.object({
+        depId: z.string(),
+        arrId: z.string(),
+        trainType: z.string(),
+      }),
+    )
+    .mutation(async ({ input }) => {
+      return await db.trip.findMany({
+        where: {
+          depId: input.depId,
+          arrId: input.arrId,
+          trainType: input.trainType,
+        },
+        orderBy: {
+          depDate: 'asc' // or 'desc'
+        }
+      });
+    }),
 });
