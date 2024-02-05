@@ -12,9 +12,12 @@ const inter = Inter({
 });
 
 export const metadata = {
-  title: "Delay Bahn",
+  title: "DelayBahn ⏳",
   description: "A TUM Web Development Project",
   icons: [{ rel: "icon", url: "/favicon.ico" }],
+  openGraph: {
+    images: [{ url: "/og-image.jpg" }],
+  }
 };
 
 export default function RootLayout({
