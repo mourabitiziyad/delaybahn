@@ -44,6 +44,8 @@ export default function TripSelection() {
 
   const [transportOption, setTransportOption] = useState("all");
 
+  api.delayStorage.getJourneyDelays.useQuery();
+
   const {
     from,
     to,
@@ -423,6 +425,7 @@ export default function TripSelection() {
                         <div>
                           <div className="space-x-2">
                             <Image
+                              loading="eager"
                               className="inline-flex h-6 w-6 rounded-sm"
                               width={100}
                               height={100}
