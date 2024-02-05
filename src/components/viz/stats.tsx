@@ -7,6 +7,7 @@ import { LineChart } from "@tremor/react";
 import { Card, CardContent, CardTitle } from "~/components/ui/card";
 import { Spinner } from "../ui/spinner";
 import StatsBar from "./bar-list";
+import { Label } from "../ui/label";
 
 export default function Stats() {
   const {
@@ -141,8 +142,9 @@ export default function Stats() {
     );
   }, [selectedDeparture, selectedArrival, selectedTrainType, trainData]);
 
-  if (isLoading) return <div>Loading...</div>;
-  if (isError) return <div>Error: {error?.message}</div>;
+  if (isLoading) return <div className="inline-flex justify-center mt-64 bg-white rounded-full px-4">
+    <Label className="inline">Loading Detailed Delay Data <Spinner className="h-6 w-6 inline" /></Label></div>;
+  if (isError) return <div className="mt-64">Error! Try refreshing the page? {error?.message}</div>;
 
   const chartData =
     tripData?.map((journey) => ({
